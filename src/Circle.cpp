@@ -1,5 +1,6 @@
 #include "Circle.hpp"
 #include "Shape.hpp"
+#include "GLFW/glfw3.h"
 
 Circle::Circle(std::vector<float> vertices) : Shape(vertices) {
 }

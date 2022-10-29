@@ -127,27 +127,16 @@ int main()
         unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
+        rectangle.transform(ourShader.ID, glm::vec2(0.5, -0.5), glm::vec2(1.0), (float)glfwGetTime());
+
         rectangle.draw();
 
-        // second transformation
-        // ---------------------
-        transform = glm::mat4(1.0f); // reset it to identity matrix
-        transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
-        float scaleAmount = static_cast<float>(sin(glfwGetTime()));
-        transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform[0][0]); // this time take the matrix value array's first element as its memory pointer value
-
         circle.draw();
-        circle2.draw();
-        circle3.draw();
 
-/*
-        rectangle2.draw();
-        circle.draw();
+        circle2.transform(ourShader.ID, glm::vec2(0.9,0.5), glm::vec2(0.2), 0);
         circle2.draw();
+        circle3.transform(ourShader.ID, glm::vec2(-0.5,-0.5), glm::vec2(5.0), 0);
         circle3.draw();
-        rectangle3.draw();
-*/
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
