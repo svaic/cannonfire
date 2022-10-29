@@ -11,9 +11,7 @@ public:
 
     std::vector<float> vertices;
 
-    static Shape createCircle(float radius, glm::vec3 color);
-
-    static Shape createRectangle();
+    static std::vector<float> mapToColor(std::vector<float> vertices, glm::vec3 color);
 };
 
 #endif //OPENGLPRJ_SHAPE_HPP

@@ -7,11 +7,10 @@ class VaoModel {
 public:
     GLuint *VAO;
     GLuint *VBO;
-    static int ctr;
 
     VaoModel(std::vector<float> &vertices);
 
-    void draw();
+    virtual void draw();
 
     void desctruct();
 };

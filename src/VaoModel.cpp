@@ -6,8 +6,8 @@ VaoModel::VaoModel(std::vector<float> &vertices) {
 
     VAO = new GLuint;
     VBO = new GLuint;
-    glGenVertexArrays(ctr, VAO);
-    glGenBuffers(ctr, VBO);
+    glGenVertexArrays(1, VAO);
+    glGenBuffers(1, VBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(*VAO);
 
@@ -23,8 +23,6 @@ VaoModel::VaoModel(std::vector<float> &vertices) {
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyway, so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     glBindVertexArray(0);
-
-    ctr++;
 }
 
 void VaoModel::draw() {

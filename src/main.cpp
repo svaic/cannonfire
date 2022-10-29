@@ -9,6 +9,8 @@
 #include <vector>
 #include "VaoModel.hpp"
 #include "Shape.hpp"
+#include "Circle.hpp"
+#include "Rectangle.hpp"
 
 
 const std::string program_name = ("GLSL Shader class example");
@@ -19,8 +21,6 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 1200;
-
-int VaoModel::ctr = 1;
 
 GLFWwindow* load() {
     // glfw: initialize and configure
@@ -68,23 +68,40 @@ int main()
                      "../res/shaders/shader.frag"
                      );
 
-
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
-    Shape circle = Shape::createCircle(0.2, glm::vec3(1.0, 1.0, 1.0));
+    Circle circle = Circle::createCircle(0.2, glm::vec3(1.0, 1.0, 1.0));
 
-    Shape circle2 = Shape::createCircle(0.1, glm::vec3(1.0, 0.0, 0.0));
+    Circle circle2 = Circle::createCircle(0.1, glm::vec3(1.0, 0.0, 0.0));
 
-    std::vector<float> vect{  0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // bottom right
-                            -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // bottom left
-                            0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    };
+    Circle circle3 = Circle::createCircle(0.05, glm::vec3(0.0, 1.0, 0.0));
 
-/*    VaoModel vaoModel(vect);
 
-    VaoModel vaoCircle(circle.vertices);
+    std::vector<float> vertices {
+            0.5f,  0.5f, // top right
+            0.5f, -0.5f, // bottom right
+            -0.5f, -0.5f,// bottom left
+            -0.5f,  0.5f,// top left
+    };
 
-    VaoModel vaoCircle2(circle2.vertices);*/
+    std::vector<float> vertices2 {
+            0.5f,  0.2f,
+            0.5f, -0.2f,
+            -0.1f, -0.2f,
+    };
+
+    std::vector<float> vertices3 {
+            0.1f,  0.2f,
+            0.1f, -0.2f,
+            -0.1f, -0.2f,
+    };
+
+    RectangleShape rectangle = RectangleShape::createRectangle(vertices, glm::vec3(0.5f,  0.5f, 0.0f));
+    RectangleShape rectangle2 = RectangleShape::createTriangle(vertices2, glm::vec3(1.0, 0.0, 0.0));
+    RectangleShape rectangle3 = RectangleShape::createTriangle(vertices3, glm::vec3(1.0, 0.0, 1.0));
+
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -101,28 +118,30 @@ int main()
         // render the triangle
         ourShader.use();
 
-        //vaoModel.draw();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        rectangle.draw();
 
-        //vaoCircle.draw();
+
+/*
+        rectangle2.draw();
         circle.draw();
-        glDrawArrays(GL_TRIANGLE_FAN, 0, circle.vertices.size()/6);
-
-        //vaoCircle2.draw();
         circle2.draw();
-        glDrawArrays(GL_TRIANGLE_FAN, 0, circle2.vertices.size()/6);
+        circle3.draw();
+        rectangle3.draw();
+*/
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
-
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     circle.desctruct();
     circle2.desctruct();
+    circle3.desctruct();
+    rectangle.desctruct();
+    rectangle2.desctruct();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
