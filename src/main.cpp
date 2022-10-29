@@ -57,6 +57,8 @@ GLFWwindow* load() {
     return window;
 }
 
+unsigned int Shape::shaderId = -1;
+
 int main()
 {
     GLFWwindow * window = load();
@@ -71,11 +73,11 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
-    Circle circle = Circle::createCircle(0.2, glm::vec3(1.0, 1.0, 1.0));
+    Circle whiteCircle = Circle::createCircle(0.2, glm::vec3(1.0, 1.0, 1.0));
 
-    Circle circle2 = Circle::createCircle(0.1, glm::vec3(1.0, 0.0, 0.0));
+    Circle redCircle = Circle::createCircle(0.1, glm::vec3(1.0, 0.0, 0.0));
 
-    Circle circle3 = Circle::createCircle(0.05, glm::vec3(0.0, 1.0, 0.0));
+    Circle blueCircle = Circle::createCircle(0.05, glm::vec3(0.0, 1.0, 0.0));
 
 
     std::vector<float> vertices {
@@ -118,25 +120,22 @@ int main()
         // render the triangle
         ourShader.use();
 
-        glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        // first container
-        // ---------------
-        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        // get their uniform location and set matrix (using glm::value_ptr)
-        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+        Shape::setShaderId(ourShader.ID);
 
-        rectangle.transform(ourShader.ID, glm::vec2(0.5, -0.5), glm::vec2(1.0), (float)glfwGetTime());
+        //rectangle.transform(ourShader.ID, glm::vec2(0.5, -0.5), glm::vec2(1.0), (float)glfwGetTime());
+        rectangle.move(glm::vec2(0.5, -0.5));
+        rectangle.rotate((float)glfwGetTime());
 
         rectangle.draw();
 
-        circle.draw();
+        whiteCircle.move(glm::vec2(-0.5, 0.9));
 
-        circle2.transform(ourShader.ID, glm::vec2(0.9,0.5), glm::vec2(0.2), 0);
-        circle2.draw();
-        circle3.transform(ourShader.ID, glm::vec2(-0.5,-0.5), glm::vec2(5.0), 0);
-        circle3.draw();
+        whiteCircle.draw();
+
+        redCircle.transform(glm::vec2(0.9, 0.5), glm::vec2(0.2), 0);
+        redCircle.draw();
+        blueCircle.transform(glm::vec2(-0.5, -0.5), glm::vec2(5.0), 0);
+        blueCircle.draw();
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -146,9 +145,9 @@ int main()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    circle.desctruct();
-    circle2.desctruct();
-    circle3.desctruct();
+    whiteCircle.desctruct();
+    redCircle.desctruct();
+    blueCircle.desctruct();
     rectangle.desctruct();
     rectangle2.desctruct();
 

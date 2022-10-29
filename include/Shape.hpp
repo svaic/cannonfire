@@ -7,14 +7,23 @@
 
 class Shape : public VaoModel {
 public:
-    glm::vec3 position;
-    Shape(std::vector<float> vertices, glm::vec3 initialPosition = glm::vec3(0.0));
+    static unsigned int shaderId;
+
+    Shape(std::vector<float> vertices);
 
     std::vector<float> vertices;
 
     static std::vector<float> mapToColor(std::vector<float> vertices, glm::vec3 color);
 
-    void transform(int shaderId, glm::vec2 move, glm::vec2 scale, float angle);
+    static void setShaderId(unsigned int id);
+
+    void transform(glm::vec2 move, glm::vec2 scale, float angle);
+
+    void move(glm::vec2 move);
+
+    void scale(glm::vec2 scale);
+
+    void rotate(float angle);
 };
 
 #endif //OPENGLPRJ_SHAPE_HPP
