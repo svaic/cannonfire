@@ -16,7 +16,7 @@
 const std::string program_name = ("GLSL Shader class example");
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow *window, Shape &shape);
 
 // settings
 const unsigned int SCR_WIDTH = 1200;
@@ -110,7 +110,10 @@ int main()
     {
         // input
         // -----
-        processInput(window);
+
+        Shape shape1 = rectangle;
+        rectangle.scale(glm::vec2(1.0));
+        processInput(window, shape1);
 
         // render
         // ------
@@ -123,12 +126,12 @@ int main()
         Shape::setShaderId(ourShader.ID);
 
         //rectangle.transform(ourShader.ID, glm::vec2(0.5, -0.5), glm::vec2(1.0), (float)glfwGetTime());
-        rectangle.move(glm::vec2(0.5, -0.5));
-        rectangle.rotate((float)glfwGetTime());
-
+        //rectangle.move(glm::vec2(0.5, -0.5));
+        //rectangle.rotate((float)glfwGetTime());
+        //rectangle.scale(glm::vec2(1.0));
         rectangle.draw();
 
-        whiteCircle.move(glm::vec2(-0.5, 0.9));
+        //whiteCircle.move(glm::vec2(-0.5, 0.9));
 
         whiteCircle.draw();
 
@@ -159,10 +162,21 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow *window, Shape &shape)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        shape.move(glm::vec2(0.0,0.1));
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        shape.move(glm::vec2(0.0,-0.1));
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        shape.move(glm::vec2(-0.1,0.0));
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        shape.move(glm::vec2(0.1,0.0));
+    }
+    //shape.draw();
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
