@@ -201,6 +201,17 @@ int main()
         HealthCircle.transform(glm::vec2(-1.0,0.8), glm::vec2(health / 100.0f, 1), 0);
         HealthCircle.draw();
 
+        bool obstaclePreventsShoot = false;
+        for (int i = 0; i < obstacles.size(); ++i) {
+            obstacles[i].move();
+            HealthCircle.transform(glm::vec2(obstacles[i].x ,obstacles[i].y), glm::vec2(1, 1), 0);
+            HealthCircle.draw();
+
+/*            if(abs(obstacles[i].x - prevStep) < 0.5) {
+                obstaclePreventsShoot = true;
+           }*/
+        }
+
 /*        for (int i = 0; i < shootings.size(); ++i) {
             glm::vec2 newCords = glm::vec2(shootings[i].x, shootings[i].y + 0.032);
             Circle t1 = Circle::createCircle(0.05, newCords , glm::vec3(1.0, 0.0, 0.0));
@@ -231,16 +242,7 @@ int main()
 
         bool xPressed = shootClicked(window);
 
-        bool obstaclePreventsShoot = false;
-        for (int i = 0; i < obstacles.size(); ++i) {
-            obstacles[i].move();
-            HealthCircle.transform(glm::vec2(obstacles[i].x ,obstacles[i].y), glm::vec2(1, 1), 0);
-            HealthCircle.draw();
 
-/*            if(abs(obstacles[i].x - prevStep) < 0.5) {
-                obstaclePreventsShoot = true;
-            }*/
-        }
 
         if (abs(getHeroX() - prevStep) < 0.1 && xPressed) {
             greenCircle.draw();
