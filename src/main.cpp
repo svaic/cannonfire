@@ -59,6 +59,26 @@ GLFWwindow* load() {
 
 unsigned int Shape::shaderId = -1;
 
+bool left = true;
+
+float robotSteps(float prevStep) {
+    if (prevStep - 0.01 <= -1.00 && left == true) {
+        left = false;
+        return prevStep;
+    }
+    else if (prevStep + 0.01 >= 1.00 && left == false) {
+        left = true;
+        return prevStep;
+    }
+    if (left) {
+        return  prevStep - 0.01;
+    } else {
+        return  prevStep + 0.01;
+    }
+}
+
+int x = 0;
+
 int main()
 {
     GLFWwindow * window = load();
@@ -73,11 +93,11 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
-    Circle whiteCircle = Circle::createCircle(0.2, glm::vec3(1.0, 1.0, 1.0));
+    Circle whiteCircle = Circle::createCircle(0.2, glm::vec2(0.0, 0.0), glm::vec3(1.0, 1.0, 1.0));
 
-    Circle redCircle = Circle::createCircle(0.1, glm::vec3(1.0, 0.0, 0.0));
+    Circle redCircle = Circle::createCircle(0.1, glm::vec2(0.0, 0.8), glm::vec3(1.0, 0.0, 0.0));
 
-    Circle blueCircle = Circle::createCircle(0.05, glm::vec3(0.0, 1.0, 0.0));
+    Circle blueCircle = Circle::createCircle(0.05, glm::vec2(0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
 
     std::vector<float> vertices {
@@ -99,21 +119,14 @@ int main()
             -0.1f, -0.2f,
     };
 
-    RectangleShape rectangle = RectangleShape::createRectangle(vertices, glm::vec3(0.5f,  0.5f, 0.0f));
-    RectangleShape rectangle2 = RectangleShape::createTriangle(vertices2, glm::vec3(1.0, 0.0, 0.0));
-    RectangleShape rectangle3 = RectangleShape::createTriangle(vertices3, glm::vec3(1.0, 0.0, 1.0));
+    RectangleShape rectangle = RectangleShape::createRectangle(vertices, glm::vec3(0.0f,  0.0f, 0.0f), glm::vec3(0.5f,  0.5f, 0.0f));
 
-
+    float prevStep = 0.0;
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
-        // input
-        // -----
 
-        Shape shape1 = rectangle;
-        rectangle.scale(glm::vec2(1.0));
-        processInput(window, shape1);
 
         // render
         // ------
@@ -125,20 +138,34 @@ int main()
 
         Shape::setShaderId(ourShader.ID);
 
-        //rectangle.transform(ourShader.ID, glm::vec2(0.5, -0.5), glm::vec2(1.0), (float)glfwGetTime());
-        //rectangle.move(glm::vec2(0.5, -0.5));
+
         //rectangle.rotate((float)glfwGetTime());
+        //whiteCircle.move(glm::vec2(0.0,-1.0));
         //rectangle.scale(glm::vec2(1.0));
-        rectangle.draw();
+        //whiteCircle.draw();
 
         //whiteCircle.move(glm::vec2(-0.5, 0.9));
 
+        // input
+        // -----
+        Shape shape1 = whiteCircle;
+        whiteCircle.move(glm::vec2(0.01*x,-1.0));
+        //rectangle.scale(glm::vec2(1.0));
+        processInput(window, shape1);
         whiteCircle.draw();
 
-        redCircle.transform(glm::vec2(0.9, 0.5), glm::vec2(0.2), 0);
+        whiteCircle.draw();
+
+        prevStep = robotSteps(prevStep);
+        redCircle.move(glm::vec2(prevStep, 1.0));
         redCircle.draw();
-        blueCircle.transform(glm::vec2(-0.5, -0.5), glm::vec2(5.0), 0);
-        blueCircle.draw();
+
+
+
+
+        //blueCircle.transform(glm::vec2(-0.5, -0.5), glm::vec2(5.0), 0);
+        //blueCircle.draw();
+
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -152,7 +179,6 @@ int main()
     redCircle.desctruct();
     blueCircle.desctruct();
     rectangle.desctruct();
-    rectangle2.desctruct();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -171,12 +197,14 @@ void processInput(GLFWwindow *window, Shape &shape)
         shape.move(glm::vec2(0.0,-0.1));
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        shape.move(glm::vec2(-0.1,0.0));
+        shape.move(glm::vec2(0.01*x,-1.0));
+        x--;
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        shape.move(glm::vec2(0.1,0.0));
+        shape.move(glm::vec2(0.01*x,-1.0));
+        x++;
     }
-    //shape.draw();
+    shape.draw();
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

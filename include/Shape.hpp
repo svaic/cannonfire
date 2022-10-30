@@ -9,7 +9,9 @@ class Shape : public VaoModel {
 public:
     static unsigned int shaderId;
 
-    Shape(std::vector<float> vertices);
+    glm::vec2 position;
+
+    Shape(std::vector<float> vertices, glm::vec2 initialPos);
 
     std::vector<float> vertices;
 

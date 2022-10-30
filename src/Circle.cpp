@@ -1,16 +1,19 @@
 #include "Circle.hpp"
+
+#include <utility>
 #include "Shape.hpp"
 #include "GLFW/glfw3.h"
 
-Circle::Circle(std::vector<float> vertices) : Shape(vertices) {
+Circle::Circle(std::vector<float> vertices, glm::vec2 initialPos) : Shape(std::move(vertices), initialPos) {
 }
 
 void Circle::draw() {
+    //move(position);
     VaoModel::draw();
     glDrawArrays(GL_TRIANGLE_FAN, 0, this->vertices.size()/6);
 }
 
-Circle Circle::createCircle(float radius, glm::vec3 color) {
+Circle Circle::createCircle(float radius, glm::vec2 initialPos, glm::vec3 color) {
     std::vector<float> vertices;
     float const PI_OVER_4 = glm::quarter_pi<float>()/4;
 
@@ -25,5 +28,5 @@ Circle Circle::createCircle(float radius, glm::vec3 color) {
         angle += PI_OVER_4;
     }
 
-    return {mapToColor(vertices, color)};
+    return {mapToColor(vertices, color), initialPos};
 }
