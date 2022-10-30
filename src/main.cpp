@@ -64,20 +64,29 @@ public:
     float speedOfEnemy;
     bool left;
 
+    Obstacle(float initX, float initY, float speed) {
+        x = initX;
+        y = initY;
+        left = true;
+        speedOfEnemy = speed;
+    }
+
     float move() {
-        if (x - speedOfEnemy <= -1.00 && left == true) {
+        if (x - speedOfEnemy <= -1.50 && left == true) {
             left = false;
-            return x;
+            //return x;
         }
-        else if (x + speedOfEnemy >= 1.00 && left == false) {
+        else if (x + speedOfEnemy >= 1.50 && left == false) {
             left = true;
-            return x;
+            //return x;
         }
         if (left) {
-            return  x - speedOfEnemy;
+            x = x - speedOfEnemy;
         } else {
-            return  x + speedOfEnemy;
+            x = x + speedOfEnemy;
         }
+        std::cout << x << " " << left << std::endl;
+
     }
 };
 
@@ -128,8 +137,6 @@ float getHeroX() {
 
 std::vector<glm::vec2> shootings;
 
-float offsetOfObstacles = 0.07;
-
 int main()
 {
     GLFWwindow * window = load();
@@ -165,6 +172,15 @@ int main()
 
     RectangleShape rectangle = RectangleShape::createRectangle(vertices, glm::vec3(0.0f,  0.0f, 0.0f), glm::vec3(0.5f,  0.5f, 0.0f));
 
+    float offsetOfObstacles = 0.1;
+
+    std::vector<Obstacle> obstacles;
+    for (int i = 0; i < 5; ++i) {
+        int random = (rand() % (100- 0)) - 50;
+
+        obstacles.push_back(Obstacle(random / 100.0f,  offsetOfObstacles * ((float)i), random / 1000.0f));
+    }
+
     float prevStep = 0.0;
     // render loop
     // -----------
@@ -184,11 +200,6 @@ int main()
 
         HealthCircle.transform(glm::vec2(-1.0,0.8), glm::vec2(health / 100.0f, 1), 0);
         HealthCircle.draw();
-
-/*        for (int i = 0; i < 10; ++i) {
-            HealthCircle.transform(glm::vec2(0.0,offsetOfObstacles * ((float)i)), glm::vec2(1, 1), 0);
-            HealthCircle.draw();
-        }*/
 
 /*        for (int i = 0; i < shootings.size(); ++i) {
             glm::vec2 newCords = glm::vec2(shootings[i].x, shootings[i].y + 0.032);
@@ -220,6 +231,16 @@ int main()
 
         bool xPressed = shootClicked(window);
 
+        bool obstaclePreventsShoot = false;
+        for (int i = 0; i < obstacles.size(); ++i) {
+            obstacles[i].move();
+            HealthCircle.transform(glm::vec2(obstacles[i].x ,obstacles[i].y), glm::vec2(1, 1), 0);
+            HealthCircle.draw();
+
+/*            if(abs(obstacles[i].x - prevStep) < 0.5) {
+                obstaclePreventsShoot = true;
+            }*/
+        }
 
         if (abs(getHeroX() - prevStep) < 0.1 && xPressed) {
             greenCircle.draw();

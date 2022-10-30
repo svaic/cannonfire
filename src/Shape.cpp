@@ -30,7 +30,7 @@ void Shape::transform(glm::vec2 move, glm::vec2 scale, float angle) {
 
     position.x += move.x;
     position.y += move.y;
-    std::cout << position.x << " " << position.y << std::endl;
+    //std::cout << position.x << " " << position.y << std::endl;
 }
 
 void Shape::move(glm::vec2 move) {
