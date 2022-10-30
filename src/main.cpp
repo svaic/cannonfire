@@ -57,27 +57,78 @@ GLFWwindow* load() {
     return window;
 }
 
+class Obstacle {
+public:
+    float x;
+    float y;
+    float speedOfEnemy;
+    bool left;
+
+    float move() {
+        if (x - speedOfEnemy <= -1.00 && left == true) {
+            left = false;
+            return x;
+        }
+        else if (x + speedOfEnemy >= 1.00 && left == false) {
+            left = true;
+            return x;
+        }
+        if (left) {
+            return  x - speedOfEnemy;
+        } else {
+            return  x + speedOfEnemy;
+        }
+    }
+};
+
 unsigned int Shape::shaderId = -1;
 
 bool left = true;
 
+float speedOfEnemy = 0.02;
+int timeToChangeSpeed = 0;
+
 float robotSteps(float prevStep) {
-    if (prevStep - 0.01 <= -1.00 && left == true) {
+    timeToChangeSpeed++;
+
+    if (timeToChangeSpeed == 10) {
+        timeToChangeSpeed = 0;
+        int newNumber = (rand() % (50 - 0)) + 0;
+        speedOfEnemy = newNumber / 1000.0;
+
+        int newNumber2 = (rand() % (10 - 0)) + 0;
+        if (newNumber2 > 7)
+            left = !left;
+    }
+
+    if (prevStep - speedOfEnemy <= -1.00 && left == true) {
         left = false;
         return prevStep;
     }
-    else if (prevStep + 0.01 >= 1.00 && left == false) {
+    else if (prevStep + speedOfEnemy >= 1.00 && left == false) {
         left = true;
         return prevStep;
     }
     if (left) {
-        return  prevStep - 0.01;
+        return  prevStep - speedOfEnemy;
     } else {
-        return  prevStep + 0.01;
+        return  prevStep + speedOfEnemy;
     }
 }
 
+bool shootClicked(GLFWwindow *window);
+
 int x = 0;
+
+int health = 100;
+
+float getHeroX() {
+    return x * 0.01;
+}
+
+std::vector<glm::vec2> shootings;
+
+float offsetOfObstacles = 0.07;
 
 int main()
 {
@@ -97,27 +148,20 @@ int main()
 
     Circle redCircle = Circle::createCircle(0.1, glm::vec2(0.0, 0.8), glm::vec3(1.0, 0.0, 0.0));
 
-    Circle blueCircle = Circle::createCircle(0.05, glm::vec2(0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    Circle greenCircle = Circle::createCircle(0.05, glm::vec2(0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
+    Circle shootCircle = Circle::createCircle(0.05, glm::vec2(0.0, -0.8), glm::vec3(1.0, 1.0, 0.0));
+
 
 
     std::vector<float> vertices {
-            0.5f,  0.5f, // top right
-            0.5f, -0.5f, // bottom right
-            -0.5f, -0.5f,// bottom left
-            -0.5f,  0.5f,// top left
+            0.5f,  0.01f, // top right
+            0.5f, -0.0f, // bottom right
+            -0.5f, -0.0f,// bottom left
+            -0.5f,  0.01f,// top left
     };
 
-    std::vector<float> vertices2 {
-            0.5f,  0.2f,
-            0.5f, -0.2f,
-            -0.1f, -0.2f,
-    };
-
-    std::vector<float> vertices3 {
-            0.1f,  0.2f,
-            0.1f, -0.2f,
-            -0.1f, -0.2f,
-    };
+    RectangleShape HealthCircle = RectangleShape::createRectangle(vertices, glm::vec2(-0.8, 0.8), glm::vec3(0.95, 0.1, 0.0));
 
     RectangleShape rectangle = RectangleShape::createRectangle(vertices, glm::vec3(0.0f,  0.0f, 0.0f), glm::vec3(0.5f,  0.5f, 0.0f));
 
@@ -126,18 +170,32 @@ int main()
     // -----------
     while (!glfwWindowShouldClose(window))
     {
-
-
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        if (health == 0) return 0;
 
         // render the triangle
         ourShader.use();
 
         Shape::setShaderId(ourShader.ID);
 
+        HealthCircle.transform(glm::vec2(-1.0,0.8), glm::vec2(health / 100.0f, 1), 0);
+        HealthCircle.draw();
+
+/*        for (int i = 0; i < 10; ++i) {
+            HealthCircle.transform(glm::vec2(0.0,offsetOfObstacles * ((float)i)), glm::vec2(1, 1), 0);
+            HealthCircle.draw();
+        }*/
+
+/*        for (int i = 0; i < shootings.size(); ++i) {
+            glm::vec2 newCords = glm::vec2(shootings[i].x, shootings[i].y + 0.032);
+            Circle t1 = Circle::createCircle(0.05, newCords , glm::vec3(1.0, 0.0, 0.0));
+            t1.draw();
+            //shootings[i] = newCords;
+        }*/
 
         //rectangle.rotate((float)glfwGetTime());
         //whiteCircle.move(glm::vec2(0.0,-1.0));
@@ -149,7 +207,7 @@ int main()
         // input
         // -----
         Shape shape1 = whiteCircle;
-        whiteCircle.move(glm::vec2(0.01*x,-1.0));
+        whiteCircle.move(glm::vec2(getHeroX(),-1.0));
         //rectangle.scale(glm::vec2(1.0));
         processInput(window, shape1);
         whiteCircle.draw();
@@ -160,12 +218,19 @@ int main()
         redCircle.move(glm::vec2(prevStep, 1.0));
         redCircle.draw();
 
+        bool xPressed = shootClicked(window);
 
 
+        if (abs(getHeroX() - prevStep) < 0.1 && xPressed) {
+            greenCircle.draw();
+            health -=1;
+        }
 
-        //blueCircle.transform(glm::vec2(-0.5, -0.5), glm::vec2(5.0), 0);
-        //blueCircle.draw();
-
+        if (xPressed) {
+            shootCircle.move(glm::vec2(getHeroX(), -0.7f));
+            shootCircle.draw();
+            //shootings.push_back(glm::vec2(getHeroX(), 0.2));
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -177,7 +242,7 @@ int main()
     // ------------------------------------------------------------------------
     whiteCircle.desctruct();
     redCircle.desctruct();
-    blueCircle.desctruct();
+    greenCircle.desctruct();
     rectangle.desctruct();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
@@ -190,12 +255,12 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window, Shape &shape)
 {
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+/*    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
         shape.move(glm::vec2(0.0,0.1));
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
         shape.move(glm::vec2(0.0,-0.1));
-    }
+    }*/
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
         shape.move(glm::vec2(0.01*x,-1.0));
         x--;
@@ -205,6 +270,13 @@ void processInput(GLFWwindow *window, Shape &shape)
         x++;
     }
     shape.draw();
+}
+
+bool shootClicked(GLFWwindow *window) {
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+        return true;
+    }
+    return false;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
