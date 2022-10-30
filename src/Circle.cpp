@@ -6,6 +6,7 @@ Circle::Circle(std::vector<float> vertices) : Shape(vertices) {
 }
 
 void Circle::draw() {
+    move(position);
     VaoModel::draw();
     glDrawArrays(GL_TRIANGLE_FAN, 0, this->vertices.size()/6);
 }

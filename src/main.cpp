@@ -16,7 +16,7 @@
 const std::string program_name = ("GLSL Shader class example");
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window, Shape &shape);
+void processInput(GLFWwindow *window, Shape *shape);
 
 // settings
 const unsigned int SCR_WIDTH = 1200;
@@ -59,6 +59,15 @@ GLFWwindow* load() {
 
 unsigned int Shape::shaderId = -1;
 
+float robotSteps(float prevStep) {
+    if (prevStep - 0.01 > -1.0) {
+        return prevStep - 0.01;
+    }
+    if (prevStep + 0.01 < 1.0) {
+        return prevStep + 0.1;
+    }
+}
+
 int main()
 {
     GLFWwindow * window = load();
@@ -77,7 +86,7 @@ int main()
 
     Circle redCircle = Circle::createCircle(0.1, glm::vec3(1.0, 0.0, 0.0));
 
-    Circle blueCircle = Circle::createCircle(0.05, glm::vec3(0.0, 1.0, 0.0));
+    Circle greenCircle = Circle::createCircle(0.05, glm::vec3(0.0, 1.0, 0.0));
 
 
     std::vector<float> vertices {
@@ -110,10 +119,10 @@ int main()
     {
         // input
         // -----
+        ourShader.use();
+        Shape::setShaderId(ourShader.ID);
 
-        Shape shape1 = rectangle;
-        rectangle.scale(glm::vec2(1.0));
-        processInput(window, shape1);
+        //rectangle.scale(glm::vec2(1.0));
 
         // render
         // ------
@@ -121,24 +130,25 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // render the triangle
-        ourShader.use();
 
-        Shape::setShaderId(ourShader.ID);
 
         //rectangle.transform(ourShader.ID, glm::vec2(0.5, -0.5), glm::vec2(1.0), (float)glfwGetTime());
-        //rectangle.move(glm::vec2(0.5, -0.5));
+        rectangle.move(glm::vec2(0.5, -0.5));
         //rectangle.rotate((float)glfwGetTime());
         //rectangle.scale(glm::vec2(1.0));
         rectangle.draw();
 
-        //whiteCircle.move(glm::vec2(-0.5, 0.9));
+        whiteCircle.move(glm::vec2(-0.5, 0.9));
 
         whiteCircle.draw();
 
-        redCircle.transform(glm::vec2(0.9, 0.5), glm::vec2(0.2), 0);
+        Shape *shape1 = &redCircle;
+
+        processInput(window, shape1);
+
         redCircle.draw();
-        blueCircle.transform(glm::vec2(-0.5, -0.5), glm::vec2(5.0), 0);
-        blueCircle.draw();
+        greenCircle.transform(glm::vec2(-0.5, -0.5), glm::vec2(5.0), 0);
+        greenCircle.draw();
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -150,7 +160,7 @@ int main()
     // ------------------------------------------------------------------------
     whiteCircle.desctruct();
     redCircle.desctruct();
-    blueCircle.desctruct();
+    greenCircle.desctruct();
     rectangle.desctruct();
     rectangle2.desctruct();
 
@@ -162,20 +172,28 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window, Shape &shape)
+void processInput(GLFWwindow *window, Shape *shape)
 {
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        shape.move(glm::vec2(0.0,0.1));
+        shape->move(glm::vec2(shape->position.x,shape->position.y + 0.01));
+        shape->position.y += 0.01;
+        std:: cout << shape->test << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        shape.move(glm::vec2(0.0,-0.1));
+        shape->move(glm::vec2(0.0,-0.01));
+        shape->position.y -= 0.01;
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        shape.move(glm::vec2(-0.1,0.0));
+        shape->move(glm::vec2(-0.01,0.0));
+        shape->position.x -= 0.01;
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        shape.move(glm::vec2(0.1,0.0));
+        shape->move(glm::vec2(0.01,0.0));
+        shape->position.x += 0.01;
     }
+
+    std:: cout << shape->position.x << " " << shape->position.y << std::endl;
+    shape->test++;
     //shape.draw();
 }
 
