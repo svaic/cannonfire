@@ -255,7 +255,7 @@ int main()
 
         // input
         // -----
-        Shape shape1 = whiteCircle;
+        Circle shape1 = whiteCircle;
         whiteCircle.move(glm::vec2(getHeroX(),-1.0));
 
         processInput(window, shape1);
