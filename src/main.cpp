@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <random>
 #include "VaoModel.hpp"
 #include "Shape.hpp"
 #include "Circle.hpp"
@@ -57,14 +58,31 @@ GLFWwindow* load() {
     return window;
 }
 
-class Obstacle {
+const unsigned int seed = time(0);
+
+std::mt19937_64 rng(seed);
+
+float getRandomFloat(float min, float max) {
+
+    std::uniform_real_distribution<float> unif(min, max);
+    return unif(rng);
+}
+
+int getRandomInt(int min, int max) {
+
+    std::uniform_int_distribution<int> unii(min, max);
+    return unii(rng);
+}
+
+class MovableObject {
 public:
     float x;
     float y;
     float speedOfEnemy;
     bool left;
+    int iteration;
 
-    Obstacle(float initX, float initY, float speed) {
+    MovableObject(float initX, float initY, float speed) {
         x = initX;
         y = initY;
         left = true;
@@ -86,7 +104,18 @@ public:
             x = x + speedOfEnemy;
         }
         std::cout << x << " " << left << std::endl;
+    }
 
+    void changeSpeed() {
+        if (iteration == 10) {
+            iteration = 0;
+
+            speedOfEnemy = getRandomFloat(0.05, 0.01);
+
+            int shouldChangeDirectionCoinFlip = getRandomInt(0,10);
+            if (shouldChangeDirectionCoinFlip > 7)
+                left = !left;
+        }
     }
 };
 
@@ -95,6 +124,7 @@ unsigned int Shape::shaderId = -1;
 bool left = true;
 
 float speedOfEnemy = 0.02;
+
 int timeToChangeSpeed = 0;
 
 float robotSteps(float prevStep) {
@@ -128,8 +158,7 @@ float robotSteps(float prevStep) {
 bool shootClicked(GLFWwindow *window);
 
 int x = 0;
-
-int health = 100;
+float health = 1;
 
 float getHeroX() {
     return x * 0.01;
@@ -147,7 +176,6 @@ int main()
     Shader ourShader("../res/shaders/shader.vert",
                      "../res/shaders/shader.frag"
                      );
-
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
@@ -158,8 +186,6 @@ int main()
     Circle greenCircle = Circle::createCircle(0.05, glm::vec2(0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
     Circle shootCircle = Circle::createCircle(0.05, glm::vec2(0.0, -0.8), glm::vec3(1.0, 1.0, 0.0));
-
-
 
     std::vector<float> vertices {
             0.5f,  0.01f, // top right
@@ -172,13 +198,14 @@ int main()
 
     RectangleShape rectangle = RectangleShape::createRectangle(vertices, glm::vec3(0.0f,  0.0f, 0.0f), glm::vec3(0.5f,  0.5f, 0.0f));
 
-    float offsetOfObstacles = 0.1;
+    float offsetOfObstacles = getRandomFloat(-0.3, 0.3);
 
-    std::vector<Obstacle> obstacles;
+    std::vector<MovableObject> obstacles;
     for (int i = 0; i < 5; ++i) {
-        int random = (rand() % (100- 0)) - 50;
+        float initX = getRandomFloat(-0.5, 0.5);
+        float initSpeed = getRandomFloat(0.03, 0.05);
 
-        obstacles.push_back(Obstacle(random / 100.0f,  offsetOfObstacles * ((float)i), random / 1000.0f));
+        obstacles.emplace_back(initX,  offsetOfObstacles * ((float)i), initSpeed);
     }
 
     float prevStep = 0.0;
@@ -191,21 +218,21 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        if (health == 0) return 0;
+        if (health < 0) return 0;
 
         // render the triangle
         ourShader.use();
 
         Shape::setShaderId(ourShader.ID);
 
-        HealthCircle.transform(glm::vec2(-1.0,0.8), glm::vec2(health / 100.0f, 1), 0);
+        HealthCircle.transform(glm::vec2(-1.0,0.8), glm::vec2(health, 1), 0);
         HealthCircle.draw();
 
         bool obstaclePreventsShoot = false;
-        for (int i = 0; i < obstacles.size(); ++i) {
-            obstacles[i].move();
-            HealthCircle.transform(glm::vec2(obstacles[i].x ,obstacles[i].y), glm::vec2(1, 1), 0);
-            HealthCircle.draw();
+        for (auto & obstacle : obstacles) {
+            obstacle.move();
+            rectangle.transform(glm::vec2(obstacle.x ,obstacle.y), glm::vec2(1, 1), 0);
+            rectangle.draw();
 
 /*            if(abs(obstacles[i].x - prevStep) < 0.5) {
                 obstaclePreventsShoot = true;
@@ -230,7 +257,7 @@ int main()
         // -----
         Shape shape1 = whiteCircle;
         whiteCircle.move(glm::vec2(getHeroX(),-1.0));
-        //rectangle.scale(glm::vec2(1.0));
+
         processInput(window, shape1);
         whiteCircle.draw();
 
@@ -242,11 +269,9 @@ int main()
 
         bool xPressed = shootClicked(window);
 
-
-
         if (abs(getHeroX() - prevStep) < 0.1 && xPressed) {
             greenCircle.draw();
-            health -=1;
+            health -=0.01;
         }
 
         if (xPressed) {
@@ -278,12 +303,6 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window, Shape &shape)
 {
-/*    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        shape.move(glm::vec2(0.0,0.1));
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        shape.move(glm::vec2(0.0,-0.1));
-    }*/
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
         shape.move(glm::vec2(0.01*x,-1.0));
         x--;
