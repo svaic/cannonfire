@@ -58,7 +58,7 @@ add_definitions(-DGLFW_INCLUDE_NONE
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
                                ${PROJECT_SHADERS} ${PROJECT_TEXTURES} ${PROJECT_CONFIGS}
-                               ${VENDORS_SOURCES} src/VaoModel.cpp include/VaoModel.hpp src/Shape.cpp include/Shape.hpp src/Circle.cpp include/Circle.hpp src/Rectangle.cpp include/Rectangle.hpp)
+                               ${VENDORS_SOURCES} src/VaoModel.cpp include/VaoModel.hpp src/Shape.cpp include/Shape.hpp src/Circle.cpp include/Circle.hpp src/Rectangle.cpp include/Rectangle.hpp include/MovableObj.cpp include/MovableObj.hpp include/RandomUtility.cpp include/RandomUtility.hpp)
 target_link_libraries(${PROJECT_NAME}
 		      glfw
                       ${GLFW_LIBRARIES} ${GLAD_LIBRARIES}

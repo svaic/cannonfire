@@ -11,10 +11,13 @@
 #include "Shape.hpp"
 #include "Circle.hpp"
 #include "Rectangle.hpp"
+#include "RandomUtility.hpp"
+#include "MovableObj.hpp"
+//#include "MovableObj.hpp"
 
 const std::string program_name = ("GLSL Shader class example");
 
-const unsigned int seed = time(0);
+/*const unsigned int seed = time(0);
 
 std::mt19937_64 rng(seed);
 
@@ -112,7 +115,7 @@ public:
     bool canShoot() {
         return arsenal > 0;
     }
-};
+};*/
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window, MovableObject &shape);
@@ -158,6 +161,7 @@ GLFWwindow* load() {
 }
 
 unsigned int Shape::shaderId = -1;
+//unsigned int RandomUtility::seed = time(0);
 
 bool shootClicked(GLFWwindow *window);
 
@@ -167,10 +171,14 @@ int numberOfObstacles = 3;
 
 float speedOfObstacles = 0.005;
 
+unsigned int seed = static_cast<long int>(std::time(nullptr));
+std::mt19937_64 RandomUtility::randomEngine = std::mt19937_64(size_t(seed));
+
 int main()
 {
     GLFWwindow * window = load();
     if(window == nullptr) return -1;
+
 
     // build and compile our shader program
     // ------------------------------------
@@ -209,9 +217,9 @@ int main()
 
     std::vector<MovableObject> obstacles;
     for (int i = 0; i < numberOfObstacles; ++i) {
-        float initX = getRandomFloat(-0.5, 0.5);
-        float initY = getRandomFloat(-0.3, 0.7);
-        float initWidth = getRandomFloat(0.1, 0.4);
+        float initX = RandomUtility::getRandomFloat(-0.5, 0.5);
+        float initY = RandomUtility::getRandomFloat(-0.3, 0.7);
+        float initWidth = RandomUtility::getRandomFloat(0.1, 0.4);
 
         obstacles.emplace_back(initX,  initY, speedOfObstacles, initWidth, 1);
     }
@@ -243,7 +251,6 @@ int main()
         heroArsenalBarRectangle.transform(glm::vec2(-1.0, -0.8), glm::vec2(hero.arsenal, 1.0), 0);
         heroArsenalBarRectangle.draw();
 
-        bool obstaclePreventsShoot = false;
         for (auto & obstacle : obstacles) {
             obstacle.moveRandom(false);
             obstacleRectangle.transform(glm::vec2(obstacle.x , obstacle.y), glm::vec2(obstacle.width, obstacle.height), 0);
@@ -260,6 +267,7 @@ int main()
 
         bool heroShoots = shootClicked(window);
 
+        bool obstaclePreventsShoot = false;
         if (hero.canShoot()) {
             if (heroShoots) {
                 hero.shoot();
