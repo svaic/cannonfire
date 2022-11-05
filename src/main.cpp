@@ -288,14 +288,14 @@ int main()
                     shootCircle.move(glm::vec2(hero.x ,minY + 0.01));
                     shootCircle.draw();
                 }
-            }
-
-            if (heroShoots && hero.collide(enemy, true) && !obstaclePreventsShoot) {
-                greenCircle.move(glm::vec2(enemy.x, enemy.y));
-                greenCircle.draw();
-                enemy.hit();
+                else if (hero.collide(enemy, true)) {
+                    greenCircle.move(glm::vec2(enemy.x, enemy.y));
+                    greenCircle.draw();
+                    enemy.hit();
+                }
             }
         } else {
+            //hero out of arsenal
             shootCircle.move(glm::vec2(hero.x, -0.8));
             shootCircle.draw();
         }
