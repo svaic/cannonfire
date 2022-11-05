@@ -31,15 +31,18 @@ int getRandomInt(int min, int max) {
 }
 
 class MovableObject {
+private:
+
+    float speed;
+    bool left;
+    int iteration;
 public:
     float x;
     float y;
     float width;
     float height;
-    float speed;
-    bool left;
-    int iteration;
     float health;
+    float arsenal;
 
     MovableObject(float initX, float initY, float initSpeed, float initWidth = 1, float initHeight = 1) {
         x = initX;
@@ -50,6 +53,7 @@ public:
         width = initWidth;
         height = initHeight;
         iteration = 0;
+        arsenal = 1;
     }
 
     void moveRandom(bool changeSide) {
@@ -96,6 +100,17 @@ public:
 
     void hit() {
         health -=0.01;
+    }
+
+    void shoot() {
+        arsenal -=0.01;
+        if (arsenal < 0) {
+            arsenal = 0;
+        }
+    }
+
+    bool canShoot() {
+        return arsenal > 0;
     }
 };
 
@@ -146,6 +161,8 @@ unsigned int Shape::shaderId = -1;
 
 bool shootClicked(GLFWwindow *window);
 
+bool refreshArsenalClicked(GLFWwindow *window);
+
 int numberOfObstacles = 3;
 
 float speedOfObstacles = 0.005;
@@ -186,6 +203,8 @@ int main()
     };
 
     RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(healthBarVertices, glm::vec2(-0.8, 0.8), glm::vec3(0.95, 0.1, 0.0));
+    RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(healthBarVertices, glm::vec2(-0.8, 0.7), glm::vec3(1.0, 1.0, 0.0));
+
     RectangleShape obstacleRectangle = RectangleShape::createRectangle(obstacleVertices, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.0f));
 
     std::vector<MovableObject> obstacles;
@@ -200,6 +219,9 @@ int main()
     MovableObject hero = MovableObject(0.0, -1.0, 0.01);
     MovableObject enemy = MovableObject(0.0, 1.0, 0.02);
 
+    ourShader.use();
+    Shape::setShaderId(ourShader.ID);
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -211,13 +233,15 @@ int main()
 
         if (enemy.health < 0) break;
 
-        // render the triangle
-        ourShader.use();
-
-        Shape::setShaderId(ourShader.ID);
+        if(refreshArsenalClicked(window)) {
+            hero.arsenal= 1.0;
+        }
 
         enemyHealthBarRectangle.transform(glm::vec2(-1.0, 0.8), glm::vec2(enemy.health, 1.0), 0);
         enemyHealthBarRectangle.draw();
+
+        heroArsenalBarRectangle.transform(glm::vec2(-1.0, -0.8), glm::vec2(hero.arsenal, 1.0), 0);
+        heroArsenalBarRectangle.draw();
 
         bool obstaclePreventsShoot = false;
         for (auto & obstacle : obstacles) {
@@ -236,29 +260,35 @@ int main()
 
         bool heroShoots = shootClicked(window);
 
-        if (heroShoots) {
-            float minY = 1.0;
+        if (hero.canShoot()) {
+            if (heroShoots) {
+                hero.shoot();
 
-            for (auto & obstacle : obstacles) {
-                if (hero.inside(obstacle, true)) {
-                    minY = std::min(minY, obstacle.y);
-                    obstaclePreventsShoot = true;
+                shootCircle.move(glm::vec2(hero.x, -0.7f));
+                shootCircle.draw();
+
+                float minY = 1.0;
+
+                for (auto & obstacle : obstacles) {
+                    if (hero.inside(obstacle, true)) {
+                        minY = std::min(minY, obstacle.y);
+                        obstaclePreventsShoot = true;
+                    }
+                }
+
+                if (obstaclePreventsShoot) {
+                    shootCircle.move(glm::vec2(hero.x ,minY + 0.01));
+                    shootCircle.draw();
                 }
             }
 
-            if (obstaclePreventsShoot) {
-                shootCircle.move(glm::vec2(hero.x ,minY + 0.01));
-                shootCircle.draw();
+            if (heroShoots && hero.collide(enemy, true) && !obstaclePreventsShoot) {
+                greenCircle.move(glm::vec2(enemy.x, enemy.y));
+                greenCircle.draw();
+                enemy.hit();
             }
-        }
-
-        if (heroShoots && hero.collide(enemy, true) && !obstaclePreventsShoot) {
-            greenCircle.draw();
-            enemy.hit();
-        }
-
-        if (heroShoots) {
-            shootCircle.move(glm::vec2(hero.x, -0.7f));
+        } else {
+            shootCircle.move(glm::vec2(hero.x, -0.8));
             shootCircle.draw();
         }
 
@@ -298,6 +328,13 @@ void processInput(GLFWwindow *window, MovableObject &object)
 
 bool shootClicked(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+        return true;
+    }
+    return false;
+}
+
+bool refreshArsenalClicked(GLFWwindow *window) {
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
         return true;
     }
     return false;
