@@ -5,7 +5,6 @@
 #include <Shader.hpp>
 
 #include <iostream>
-#include <cstring>
 #include <vector>
 #include <random>
 #include "VaoModel.hpp"
@@ -13,14 +12,99 @@
 #include "Circle.hpp"
 #include "Rectangle.hpp"
 
-
 const std::string program_name = ("GLSL Shader class example");
 
+const unsigned int seed = time(0);
+
+std::mt19937_64 rng(seed);
+
+float getRandomFloat(float min, float max) {
+
+    std::uniform_real_distribution<float> unif(min, max);
+    return unif(rng);
+}
+
+int getRandomInt(int min, int max) {
+
+    std::uniform_int_distribution<int> unii(min, max);
+    return unii(rng);
+}
+
+class MovableObject {
+public:
+    float x;
+    float y;
+    float width;
+    float height;
+    float speed;
+    bool left;
+    int iteration;
+    float health;
+
+    MovableObject(float initX, float initY, float initSpeed, float initWidth = 1, float initHeight = 1) {
+        x = initX;
+        y = initY;
+        left = true;
+        speed = initSpeed;
+        health = 1.0;
+        width = initWidth;
+        height = initHeight;
+        iteration = 0;
+    }
+
+    void moveRandom(bool changeSide) {
+        if (changeSide) changePosition();
+        if (x - speed <= -1.00 && left == true) {
+            left = false;
+        }
+        else if (x + speed >= 1.00 && left == false) {
+            left = true;
+        }
+        if (left) {
+            x = x - speed;
+        } else {
+            x = x + speed;
+        }
+    }
+
+    void move(float offset) {
+        x += offset;
+    }
+
+    void changePosition() {
+        if (iteration == 10) {
+            iteration = 0;
+
+            speed = getRandomFloat(0.05, 0.01);
+
+            int shouldChangeDirectionCoinFlip = getRandomInt(0,10);
+            if (shouldChangeDirectionCoinFlip > 7)
+                left = !left;
+        }
+        iteration++;
+    }
+
+    bool collide(MovableObject & other, bool xAxis) {
+        if (xAxis) return abs(this->x - other.x) < 0.1;
+        else return abs(this->y - other.y) < 0.1;
+    }
+
+    bool inside(MovableObject & other, bool xAxis) {
+        if (xAxis) return this->x <= other.x + other.width && this->x >= other.x - other.width;
+        return false;
+    }
+
+    void hit() {
+        health -=0.01;
+    }
+};
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window, Shape &shape);
+void processInput(GLFWwindow *window, MovableObject &shape);
 
 // settings
 const unsigned int SCR_WIDTH = 1200;
+
 const unsigned int SCR_HEIGHT = 1200;
 
 GLFWwindow* load() {
@@ -58,113 +142,13 @@ GLFWwindow* load() {
     return window;
 }
 
-const unsigned int seed = time(0);
-
-std::mt19937_64 rng(seed);
-
-float getRandomFloat(float min, float max) {
-
-    std::uniform_real_distribution<float> unif(min, max);
-    return unif(rng);
-}
-
-int getRandomInt(int min, int max) {
-
-    std::uniform_int_distribution<int> unii(min, max);
-    return unii(rng);
-}
-
-class MovableObject {
-public:
-    float x;
-    float y;
-    float speedOfEnemy;
-    bool left;
-    int iteration;
-
-    MovableObject(float initX, float initY, float speed) {
-        x = initX;
-        y = initY;
-        left = true;
-        speedOfEnemy = speed;
-    }
-
-    float move() {
-        if (x - speedOfEnemy <= -1.50 && left == true) {
-            left = false;
-            //return x;
-        }
-        else if (x + speedOfEnemy >= 1.50 && left == false) {
-            left = true;
-            //return x;
-        }
-        if (left) {
-            x = x - speedOfEnemy;
-        } else {
-            x = x + speedOfEnemy;
-        }
-        std::cout << x << " " << left << std::endl;
-    }
-
-    void changeSpeed() {
-        if (iteration == 10) {
-            iteration = 0;
-
-            speedOfEnemy = getRandomFloat(0.05, 0.01);
-
-            int shouldChangeDirectionCoinFlip = getRandomInt(0,10);
-            if (shouldChangeDirectionCoinFlip > 7)
-                left = !left;
-        }
-    }
-};
-
 unsigned int Shape::shaderId = -1;
-
-bool left = true;
-
-float speedOfEnemy = 0.02;
-
-int timeToChangeSpeed = 0;
-
-float robotSteps(float prevStep) {
-    timeToChangeSpeed++;
-
-    if (timeToChangeSpeed == 10) {
-        timeToChangeSpeed = 0;
-        int newNumber = (rand() % (50 - 0)) + 0;
-        speedOfEnemy = newNumber / 1000.0;
-
-        int newNumber2 = (rand() % (10 - 0)) + 0;
-        if (newNumber2 > 7)
-            left = !left;
-    }
-
-    if (prevStep - speedOfEnemy <= -1.00 && left == true) {
-        left = false;
-        return prevStep;
-    }
-    else if (prevStep + speedOfEnemy >= 1.00 && left == false) {
-        left = true;
-        return prevStep;
-    }
-    if (left) {
-        return  prevStep - speedOfEnemy;
-    } else {
-        return  prevStep + speedOfEnemy;
-    }
-}
 
 bool shootClicked(GLFWwindow *window);
 
-int x = 0;
-float health = 1;
+int numberOfObstacles = 3;
 
-float getHeroX() {
-    return x * 0.01;
-}
-
-std::vector<glm::vec2> shootings;
+float speedOfObstacles = 0.005;
 
 int main()
 {
@@ -179,36 +163,43 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
-    Circle whiteCircle = Circle::createCircle(0.2, glm::vec2(0.0, 0.0), glm::vec3(1.0, 1.0, 1.0));
+    Circle heroCircle = Circle::createCircle(0.2, glm::vec2(0.0, 0.0), glm::vec3(1.0, 1.0, 1.0));
 
-    Circle redCircle = Circle::createCircle(0.1, glm::vec2(0.0, 0.8), glm::vec3(1.0, 0.0, 0.0));
+    Circle enemyCircle = Circle::createCircle(0.1, glm::vec2(0.0, 0.8), glm::vec3(1.0, 0.0, 0.0));
 
     Circle greenCircle = Circle::createCircle(0.05, glm::vec2(0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
     Circle shootCircle = Circle::createCircle(0.05, glm::vec2(0.0, -0.8), glm::vec3(1.0, 1.0, 0.0));
 
-    std::vector<float> vertices {
+    std::vector<float> healthBarVertices {
             0.5f,  0.01f, // top right
             0.5f, -0.0f, // bottom right
             -0.5f, -0.0f,// bottom left
             -0.5f,  0.01f,// top left
     };
 
-    RectangleShape HealthCircle = RectangleShape::createRectangle(vertices, glm::vec2(-0.8, 0.8), glm::vec3(0.95, 0.1, 0.0));
+    std::vector<float> obstacleVertices {
+            1.0f,  0.04f, // top right
+            1.0f, -0.0f, // bottom right
+            -1.0f, -0.0f,// bottom left
+            -1.0f,  0.04f,// top left
+    };
 
-    RectangleShape rectangle = RectangleShape::createRectangle(vertices, glm::vec3(0.0f,  0.0f, 0.0f), glm::vec3(0.5f,  0.5f, 0.0f));
-
-    float offsetOfObstacles = getRandomFloat(-0.3, 0.3);
+    RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(healthBarVertices, glm::vec2(-0.8, 0.8), glm::vec3(0.95, 0.1, 0.0));
+    RectangleShape obstacleRectangle = RectangleShape::createRectangle(obstacleVertices, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.0f));
 
     std::vector<MovableObject> obstacles;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < numberOfObstacles; ++i) {
         float initX = getRandomFloat(-0.5, 0.5);
-        float initSpeed = getRandomFloat(0.03, 0.05);
+        float initY = getRandomFloat(-0.3, 0.7);
+        float initWidth = getRandomFloat(0.1, 0.4);
 
-        obstacles.emplace_back(initX,  offsetOfObstacles * ((float)i), initSpeed);
+        obstacles.emplace_back(initX,  initY, speedOfObstacles, initWidth, 1);
     }
 
-    float prevStep = 0.0;
+    MovableObject hero = MovableObject(0.0, -1.0, 0.01);
+    MovableObject enemy = MovableObject(0.0, 1.0, 0.02);
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -218,66 +209,57 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        if (health < 0) return 0;
+        if (enemy.health < 0) break;
 
         // render the triangle
         ourShader.use();
 
         Shape::setShaderId(ourShader.ID);
 
-        HealthCircle.transform(glm::vec2(-1.0,0.8), glm::vec2(health, 1), 0);
-        HealthCircle.draw();
+        enemyHealthBarRectangle.transform(glm::vec2(-1.0, 0.8), glm::vec2(enemy.health, 1.0), 0);
+        enemyHealthBarRectangle.draw();
 
         bool obstaclePreventsShoot = false;
         for (auto & obstacle : obstacles) {
-            obstacle.move();
-            rectangle.transform(glm::vec2(obstacle.x ,obstacle.y), glm::vec2(1, 1), 0);
-            rectangle.draw();
-
-/*            if(abs(obstacles[i].x - prevStep) < 0.5) {
-                obstaclePreventsShoot = true;
-           }*/
+            obstacle.moveRandom(false);
+            obstacleRectangle.transform(glm::vec2(obstacle.x , obstacle.y), glm::vec2(obstacle.width, obstacle.height), 0);
+            obstacleRectangle.draw();
         }
 
-/*        for (int i = 0; i < shootings.size(); ++i) {
-            glm::vec2 newCords = glm::vec2(shootings[i].x, shootings[i].y + 0.032);
-            Circle t1 = Circle::createCircle(0.05, newCords , glm::vec3(1.0, 0.0, 0.0));
-            t1.draw();
-            //shootings[i] = newCords;
-        }*/
+        processInput(window, hero);
+        heroCircle.move(glm::vec2(hero.x, hero.y));
+        heroCircle.draw();
 
-        //rectangle.rotate((float)glfwGetTime());
-        //whiteCircle.move(glm::vec2(0.0,-1.0));
-        //rectangle.scale(glm::vec2(1.0));
-        //whiteCircle.draw();
+        enemy.moveRandom(true);
+        enemyCircle.move(glm::vec2(enemy.x, enemy.y));
+        enemyCircle.draw();
 
-        //whiteCircle.move(glm::vec2(-0.5, 0.9));
+        bool heroShoots = shootClicked(window);
 
-        // input
-        // -----
-        Circle shape1 = whiteCircle;
-        whiteCircle.move(glm::vec2(getHeroX(),-1.0));
+        if (heroShoots) {
+            float minY = 1.0;
 
-        processInput(window, shape1);
-        whiteCircle.draw();
+            for (auto & obstacle : obstacles) {
+                if (hero.inside(obstacle, true)) {
+                    minY = std::min(minY, obstacle.y);
+                    obstaclePreventsShoot = true;
+                }
+            }
 
-        whiteCircle.draw();
+            if (obstaclePreventsShoot) {
+                shootCircle.move(glm::vec2(hero.x ,minY + 0.01));
+                shootCircle.draw();
+            }
+        }
 
-        prevStep = robotSteps(prevStep);
-        redCircle.move(glm::vec2(prevStep, 1.0));
-        redCircle.draw();
-
-        bool xPressed = shootClicked(window);
-
-        if (abs(getHeroX() - prevStep) < 0.1 && xPressed) {
+        if (heroShoots && hero.collide(enemy, true) && !obstaclePreventsShoot) {
             greenCircle.draw();
-            health -=0.01;
+            enemy.hit();
         }
 
-        if (xPressed) {
-            shootCircle.move(glm::vec2(getHeroX(), -0.7f));
+        if (heroShoots) {
+            shootCircle.move(glm::vec2(hero.x, -0.7f));
             shootCircle.draw();
-            //shootings.push_back(glm::vec2(getHeroX(), 0.2));
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -286,12 +268,15 @@ int main()
         glfwPollEvents();
     }
 
+    std::cout << "You've won. Congratulations!";
+
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    whiteCircle.desctruct();
-    redCircle.desctruct();
+    heroCircle.desctruct();
+    enemyCircle.desctruct();
     greenCircle.desctruct();
-    rectangle.desctruct();
+    enemyHealthBarRectangle.desctruct();
+    obstacleRectangle.desctruct();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -301,17 +286,14 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window, Shape &shape)
+void processInput(GLFWwindow *window, MovableObject &object)
 {
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        shape.move(glm::vec2(0.01*x,-1.0));
-        x--;
+        object.move(-0.01);
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        shape.move(glm::vec2(0.01*x,-1.0));
-        x++;
+        object.move(0.01);
     }
-    shape.draw();
 }
 
 bool shootClicked(GLFWwindow *window) {
