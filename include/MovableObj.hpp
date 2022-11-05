@@ -25,7 +25,12 @@ public:
     void moveRandom(bool changeSide);
     void move(float offset);
     void changePosition();
-    bool collide(MovableObject & other, bool xAxis);
+
+    bool collide(MovableObject & other, bool xAxis) {
+        if (xAxis) return abs(this->x - other.x) < 0.1;
+        else return abs(this->y - other.y) < 0.1;
+    }
+
     bool inside(MovableObject & other, bool xAxis);
     void hit();
     void shoot();

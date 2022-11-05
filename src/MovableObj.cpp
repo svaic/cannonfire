@@ -48,10 +48,7 @@ void MovableObject::changePosition() {
     iteration++;
 }
 
-bool MovableObject::collide(MovableObject &other, bool xAxis) {
-    if (xAxis) return abs(this->x - other.x) < 0.1;
-    else return abs(this->y - other.y) < 0.1;
-}
+//bool MovableObject::collide(MovableObject &other, bool xAxis);
 
 bool MovableObject::inside(MovableObject &other, bool xAxis) {
         if (xAxis) return this->x <= other.x + other.width && this->x >= other.x - other.width;
