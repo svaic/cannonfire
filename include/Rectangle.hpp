@@ -12,7 +12,7 @@ public:
     static RectangleShape createRectangle(std::vector<float> vertices, glm::vec3 color);
     static RectangleShape createRectangle(float width, float height, glm::vec3 color);
     static RectangleShape createTriangle(std::vector<float> vertices, glm::vec3 color, glm::vec2 initialPos);
-    void desctruct();
+    void destructor();
 };
 
 

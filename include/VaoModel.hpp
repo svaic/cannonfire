@@ -12,7 +12,7 @@ public:
 
     virtual void draw();
 
-    void desctruct();
+    void destructor();
 };
 
 

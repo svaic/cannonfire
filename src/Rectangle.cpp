@@ -51,8 +51,8 @@ void RectangleShape::draw() {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
-void RectangleShape::desctruct() {
-    VaoModel::desctruct();
+void RectangleShape::destructor() {
+    VaoModel::destructor();
     glDeleteBuffers(1, EBO);
 }
 

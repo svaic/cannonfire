@@ -29,7 +29,7 @@ void VaoModel::draw() {
     glBindVertexArray(*VAO);
 }
 
-void VaoModel::desctruct() {
+void VaoModel::destructor() {
     glDeleteVertexArrays(1, VAO);
     glDeleteBuffers(1, VBO);
 }

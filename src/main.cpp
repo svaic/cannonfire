@@ -208,11 +208,11 @@ int main()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    heroCircle.desctruct();
-    enemyCircle.desctruct();
-    greenCircle.desctruct();
-    enemyHealthBarRectangle.desctruct();
-    obstacleRectangle.desctruct();
+    heroCircle.destructor();
+    enemyCircle.destructor();
+    greenCircle.destructor();
+    enemyHealthBarRectangle.destructor();
+    obstacleRectangle.destructor();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
