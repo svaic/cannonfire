@@ -13,112 +13,13 @@
 #include "Rectangle.hpp"
 #include "RandomUtility.hpp"
 #include "MovableObj.hpp"
-//#include "MovableObj.hpp"
+#include "Color.hpp"
+#include "ShapeContainer.hpp"
 
 const std::string program_name = ("GLSL Shader class example");
 
-/*const unsigned int seed = time(0);
-
-std::mt19937_64 rng(seed);
-
-float getRandomFloat(float min, float max) {
-
-    std::uniform_real_distribution<float> unif(min, max);
-    return unif(rng);
-}
-
-int getRandomInt(int min, int max) {
-
-    std::uniform_int_distribution<int> unii(min, max);
-    return unii(rng);
-}
-
-class MovableObject {
-private:
-
-    float speed;
-    bool left;
-    int iteration;
-public:
-    float x;
-    float y;
-    float width;
-    float height;
-    float health;
-    float arsenal;
-
-    MovableObject(float initX, float initY, float initSpeed, float initWidth = 1, float initHeight = 1) {
-        x = initX;
-        y = initY;
-        left = true;
-        speed = initSpeed;
-        health = 1.0;
-        width = initWidth;
-        height = initHeight;
-        iteration = 0;
-        arsenal = 1;
-    }
-
-    void moveRandom(bool changeSide) {
-        if (changeSide) changePosition();
-        if (x - speed <= -1.00 && left == true) {
-            left = false;
-        }
-        else if (x + speed >= 1.00 && left == false) {
-            left = true;
-        }
-        if (left) {
-            x = x - speed;
-        } else {
-            x = x + speed;
-        }
-    }
-
-    void move(float offset) {
-        x += offset;
-    }
-
-    void changePosition() {
-        if (iteration == 10) {
-            iteration = 0;
-
-            speed = getRandomFloat(0.05, 0.01);
-
-            int shouldChangeDirectionCoinFlip = getRandomInt(0,10);
-            if (shouldChangeDirectionCoinFlip > 7)
-                left = !left;
-        }
-        iteration++;
-    }
-
-    bool collide(MovableObject & other, bool xAxis) {
-        if (xAxis) return abs(this->x - other.x) < 0.1;
-        else return abs(this->y - other.y) < 0.1;
-    }
-
-    bool inside(MovableObject & other, bool xAxis) {
-        if (xAxis) return this->x <= other.x + other.width && this->x >= other.x - other.width;
-        return false;
-    }
-
-    void hit() {
-        health -=0.01;
-    }
-
-    void shoot() {
-        arsenal -=0.01;
-        if (arsenal < 0) {
-            arsenal = 0;
-        }
-    }
-
-    bool canShoot() {
-        return arsenal > 0;
-    }
-};*/
-
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window, MovableObject &shape);
+void listenToMoveHero(GLFWwindow *window, MovableObject &object);
 
 // settings
 const unsigned int SCR_WIDTH = 1200;
@@ -161,7 +62,7 @@ GLFWwindow* load() {
 }
 
 unsigned int Shape::shaderId = -1;
-//unsigned int RandomUtility::seed = time(0);
+unsigned int ShapeContainer::shaderId = -1;
 
 bool shootClicked(GLFWwindow *window);
 
@@ -188,13 +89,13 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
-    Circle heroCircle = Circle::createCircle(0.2, glm::vec2(0.0, 0.0), glm::vec3(1.0, 1.0, 1.0));
+    Circle heroCircle = Circle::createCircle(0.2, Color::WHITE);
 
-    Circle enemyCircle = Circle::createCircle(0.1, glm::vec2(0.0, 0.8), glm::vec3(1.0, 0.0, 0.0));
+    Circle enemyCircle = Circle::createCircle(0.1, Color::RED);
 
-    Circle greenCircle = Circle::createCircle(0.05, glm::vec2(0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    Circle greenCircle = Circle::createCircle(0.05, Color::GREEN);
 
-    Circle shootCircle = Circle::createCircle(0.05, glm::vec2(0.0, -0.8), glm::vec3(1.0, 1.0, 0.0));
+    Circle shootCircle = Circle::createCircle(0.05, Color::YELLOW);
 
     std::vector<float> healthBarVertices {
             0.5f,  0.01f, // top right
@@ -203,17 +104,10 @@ int main()
             -0.5f,  0.01f,// top left
     };
 
-    std::vector<float> obstacleVertices {
-            1.0f,  0.04f, // top right
-            1.0f, -0.0f, // bottom right
-            -1.0f, -0.0f,// bottom left
-            -1.0f,  0.04f,// top left
-    };
+    RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(healthBarVertices, Color::DARK_RED);
+    RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(healthBarVertices, Color::YELLOW);
 
-    RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(healthBarVertices, glm::vec2(-0.8, 0.8), glm::vec3(0.95, 0.1, 0.0));
-    RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(healthBarVertices, glm::vec2(-0.8, 0.7), glm::vec3(1.0, 1.0, 0.0));
-
-    RectangleShape obstacleRectangle = RectangleShape::createRectangle(obstacleVertices, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.0f));
+    RectangleShape obstacleRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::GREEN_YELLOW);
 
     std::vector<MovableObject> obstacles;
     for (int i = 0; i < numberOfObstacles; ++i) {
@@ -229,6 +123,11 @@ int main()
 
     ourShader.use();
     Shape::setShaderId(ourShader.ID);
+    ShapeContainer::shaderId = ourShader.ID;
+
+    ShapeContainer obstacleWithCircle;
+    obstacleWithCircle.add(&obstacleRectangle);
+    obstacleWithCircle.add(&enemyCircle);
 
     // render loop
     // -----------
@@ -257,7 +156,7 @@ int main()
             obstacleRectangle.draw();
         }
 
-        processInput(window, hero);
+        listenToMoveHero(window, hero);
         heroCircle.move(glm::vec2(hero.x, hero.y));
         heroCircle.draw();
 
@@ -300,6 +199,8 @@ int main()
             shootCircle.draw();
         }
 
+        obstacleWithCircle.transform(glm::vec2(0.0, 0.0), glm::vec2(1.0, 1.0), static_cast<float>(glfwGetTime()*20));
+
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -324,7 +225,7 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window, MovableObject &object)
+void listenToMoveHero(GLFWwindow *window, MovableObject &object)
 {
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
         object.move(-0.01);

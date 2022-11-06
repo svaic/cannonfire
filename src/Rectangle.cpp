@@ -6,7 +6,7 @@
 
 #include <utility>
 
-RectangleShape::RectangleShape(std::vector<float> vertices, glm::vec2 initialPos, std::vector<int> indices) : Shape(vertices, initialPos) {
+RectangleShape::RectangleShape(std::vector<float> vertices, std::vector<int> indices) : Shape(vertices) {
 
     if  (indices.empty()) {
         indices = {  // note that we start from 0!
@@ -56,8 +56,19 @@ void RectangleShape::desctruct() {
     glDeleteBuffers(1, EBO);
 }
 
-RectangleShape RectangleShape::createRectangle(std::vector<float> vertices, glm::vec2 initialPos, glm::vec3 color) {
-    return {mapToColor(std::move(vertices), color), initialPos};
+RectangleShape RectangleShape::createRectangle(std::vector<float> vertices, glm::vec3 color) {
+    return {mapToColor(std::move(vertices), color)};
+}
+
+RectangleShape RectangleShape::createRectangle(float width, float height, glm::vec3 color) {
+    std::vector<float> vertices {
+            height,  width, // top right
+            -height, width, // bottom right
+            -height, -width,// bottom left
+            height,  -width,// top left
+    };
+
+    return createRectangle(vertices, color);
 }
 
 RectangleShape RectangleShape::createTriangle(std::vector<float> vertices, glm::vec3 color, glm::vec2 initialPos) {
@@ -65,5 +76,5 @@ RectangleShape RectangleShape::createTriangle(std::vector<float> vertices, glm::
             0,1,2
     };
 
-    return {mapToColor(std::move(vertices), color), initialPos, indices};
+    return {mapToColor(std::move(vertices), color), indices};
 }

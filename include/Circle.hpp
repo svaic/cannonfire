@@ -7,9 +7,9 @@
 
 class Circle : public Shape {
 public:
-    Circle(std::vector<float> vertices, glm::vec2 initialPos);
+    Circle(std::vector<float> vertices);
     void draw();
-    static Circle createCircle(float radius, glm::vec2 initialPosition, glm::vec3 color);
+    static Circle createCircle(float radius, glm::vec3 color);
 };
 
 

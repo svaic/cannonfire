@@ -3,9 +3,8 @@
 #include <iostream>
 #include "Shape.hpp"
 
-Shape::Shape(std::vector<float> vertices, glm::vec2 initialPos): VaoModel(vertices) {
+Shape::Shape(std::vector<float> vertices): VaoModel(vertices) {
     this->vertices = std::move(vertices);
-    this->position = glm::vec2(initialPos);
 }
 
 std::vector<float> Shape::mapToColor(std::vector<float> vertices, glm::vec3 color) {
@@ -27,10 +26,6 @@ void Shape::transform(glm::vec2 move, glm::vec2 scale, float angle) {
     transform = glm::rotate(transform, angle, glm::vec3(0.0f, 0.0f, 1.0f));
     transform = glm::scale(transform, glm::vec3(scale, 1.0));
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-    position.x += move.x;
-    position.y += move.y;
-    //std::cout << position.x << " " << position.y << std::endl;
 }
 
 void Shape::move(glm::vec2 move) {
