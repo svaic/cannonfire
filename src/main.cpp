@@ -22,9 +22,17 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void listenToMoveHero(GLFWwindow *window, MovableObject &object);
 
 // settings
-const unsigned int SCR_WIDTH = 1200;
+unsigned int seed = static_cast<long int>(std::time(nullptr));
+std::mt19937_64 RandomUtility::randomEngine = std::mt19937_64(size_t(seed));
 
+const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 1200;
+
+unsigned int Shape::shaderId = -1;
+unsigned int ShapeContainer::shaderId = -1;
+
+int numberOfObstacles = 3;
+float speedOfObstacles = 0.005;
 
 GLFWwindow* load() {
     // glfw: initialize and configure
@@ -61,25 +69,14 @@ GLFWwindow* load() {
     return window;
 }
 
-unsigned int Shape::shaderId = -1;
-unsigned int ShapeContainer::shaderId = -1;
-
 bool shootClicked(GLFWwindow *window);
 
 bool refreshArsenalClicked(GLFWwindow *window);
-
-int numberOfObstacles = 3;
-
-float speedOfObstacles = 0.005;
-
-unsigned int seed = static_cast<long int>(std::time(nullptr));
-std::mt19937_64 RandomUtility::randomEngine = std::mt19937_64(size_t(seed));
 
 int main()
 {
     GLFWwindow * window = load();
     if(window == nullptr) return -1;
-
 
     // build and compile our shader program
     // ------------------------------------
@@ -121,13 +118,13 @@ int main()
     MovableObject hero = MovableObject(0.0, -1.0, 0.01);
     MovableObject enemy = MovableObject(0.0, 1.0, 0.02);
 
-    ourShader.use();
-    Shape::setShaderId(ourShader.ID);
-    ShapeContainer::shaderId = ourShader.ID;
-
     ShapeContainer obstacleWithCircle;
     obstacleWithCircle.add(&obstacleRectangle);
     obstacleWithCircle.add(&enemyCircle);
+
+    ourShader.use();
+    Shape::setShaderId(ourShader.ID);
+    ShapeContainer::setShaderId(ourShader.ID);
 
     // render loop
     // -----------

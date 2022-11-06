@@ -20,7 +20,7 @@ public:
     void move(glm::vec2 move);
     void scale(glm::vec2 scale);
     void rotate(float angle);
-    void setShaderId(unsigned int id);
+    static void setShaderId(unsigned int id);
 };
 
 
