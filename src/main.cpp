@@ -34,6 +34,8 @@ unsigned int ShapeContainer::shaderId = -1;
 int numberOfObstacles = 3;
 float speedOfObstacles = 0.005;
 
+float speedOfBullet = 0.05;
+
 GLFWwindow* load() {
     // glfw: initialize and configure
     // ------------------------------
@@ -86,7 +88,7 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
-    Circle heroCircle = Circle::createCircle(0.2, Color::WHITE);
+    Circle heroCircle = Circle::createCircle(0.1, Color::BLACK);
 
     Circle enemyCircle = Circle::createCircle(0.1, Color::RED);
 
@@ -104,7 +106,16 @@ int main()
     RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(healthBarVertices, Color::DARK_RED);
     RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(healthBarVertices, Color::YELLOW);
 
-    RectangleShape obstacleRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::GREEN_YELLOW);
+    RectangleShape obstacleRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::BLACK);
+    RectangleShape heroCanonRectangle = RectangleShape::createRectangle(0.2, 0.075, Color::GREY);
+
+    std::vector<float> heroCanonEdgeVertices {
+            0.1f,  0.25f, // top right
+            0.1f, 0.2f, // bottom right
+            -0.1f, 0.2f,// bottom left
+            -0.1f,  0.25f,// top left
+    };
+    RectangleShape heroCanonEdgeRectangle = RectangleShape::createRectangle(heroCanonEdgeVertices, Color::DARK_GREY);
 
     std::vector<MovableObject> obstacles;
     for (int i = 0; i < numberOfObstacles; ++i) {
@@ -118,13 +129,16 @@ int main()
     MovableObject hero = MovableObject(0.0, -1.0, 0.01);
     MovableObject enemy = MovableObject(0.0, 1.0, 0.02);
 
-    ShapeContainer obstacleWithCircle;
-    obstacleWithCircle.add(&obstacleRectangle);
-    obstacleWithCircle.add(&enemyCircle);
+    ShapeContainer heroContainer;
+    heroContainer.add(&heroCanonEdgeRectangle);
+    heroContainer.add(&heroCanonRectangle);
+    heroContainer.add(&heroCircle);
 
     ourShader.use();
     Shape::setShaderId(ourShader.ID);
     ShapeContainer::setShaderId(ourShader.ID);
+
+    std::vector<MovableObject> bullets;
 
     // render loop
     // -----------
@@ -132,7 +146,8 @@ int main()
     {
         // render
         // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glm::vec3 whiteColor = Color::WHITE;
+        glClearColor(whiteColor.x, whiteColor.y, whiteColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         if (enemy.health < 0) break;
@@ -151,11 +166,27 @@ int main()
             obstacle.moveRandom(false);
             obstacleRectangle.transform(glm::vec2(obstacle.x , obstacle.y), glm::vec2(obstacle.width, obstacle.height), 0);
             obstacleRectangle.draw();
+
+            for (int i = 0; i < bullets.size(); ++i) {
+                if (obstacle.collide(bullets[i], true)) {
+                    bullets.erase(bullets.begin()+i);
+                }
+            }
+        }
+
+        for (int i=0; i < bullets.size(); i++) {
+            if (bullets[i].y > 1.0) {
+                bullets.erase(bullets.begin()+i);
+            }
+
+            bullets[i].move_y(speedOfBullet);
+            shootCircle.move(glm::vec2(bullets[i].x , bullets[i].y));
+            shootCircle.draw();
         }
 
         listenToMoveHero(window, hero);
-        heroCircle.move(glm::vec2(hero.x, hero.y));
-        heroCircle.draw();
+        heroContainer.move(glm::vec2(hero.x, hero.y));
+        heroContainer.draw();
 
         enemy.moveRandom(true);
         enemyCircle.move(glm::vec2(enemy.x, enemy.y));
@@ -167,8 +198,9 @@ int main()
         if (hero.canShoot()) {
             if (heroShoots) {
                 hero.shoot();
+                bullets.emplace_back(hero.x, hero.y, speedOfBullet);
 
-                shootCircle.move(glm::vec2(hero.x, -0.7f));
+                shootCircle.move(glm::vec2(hero.x, hero.y));
                 shootCircle.draw();
 
                 float minY = 1.0;
@@ -195,8 +227,6 @@ int main()
             shootCircle.move(glm::vec2(hero.x, -0.8));
             shootCircle.draw();
         }
-
-        obstacleWithCircle.transform(glm::vec2(0.0, 0.0), glm::vec2(1.0, 1.0), static_cast<float>(glfwGetTime()*20));
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -225,10 +255,10 @@ int main()
 void listenToMoveHero(GLFWwindow *window, MovableObject &object)
 {
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        object.move(-0.01);
+        object.move_x(-0.01);
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        object.move(0.01);
+        object.move_x(0.01);
     }
 }
 

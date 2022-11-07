@@ -10,11 +10,13 @@
 
 class Color {
 public:
+    static const glm::vec3 BLACK;
+    static const glm::vec3 WHITE;
+    static const glm::vec3 GREY;
+    static const glm::vec3 DARK_GREY;
     static const glm::vec3 RED;
     static const glm::vec3 GREEN;
     static const glm::vec3 BLUE;
-    static const glm::vec3 BLACK;
-    static const glm::vec3 WHITE;
     static const glm::vec3 YELLOW;
     static const glm::vec3 DARK_RED;
     static const glm::vec3 GREEN_YELLOW;

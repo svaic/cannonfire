@@ -31,8 +31,12 @@ void MovableObject::moveRandom(bool changeSide) {
     }
 }
 
-void MovableObject::move(float offset) {
+void MovableObject::move_x(float offset) {
     x += offset;
+}
+
+void MovableObject::move_y(float offset) {
+    y += offset;
 }
 
 void MovableObject::changePosition() {
@@ -47,8 +51,6 @@ void MovableObject::changePosition() {
     }
     iteration++;
 }
-
-//bool MovableObject::collide(MovableObject &other, bool xAxis);
 
 bool MovableObject::inside(MovableObject &other, bool xAxis) {
         if (xAxis) return this->x <= other.x + other.width && this->x >= other.x - other.width;
