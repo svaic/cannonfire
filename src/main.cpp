@@ -207,8 +207,9 @@ int main()
 
         bool heroShoots = shootClicked(window);
 
+        // hero shoots
         if (hero.canShoot()) {
-            if (heroShoots) {
+            if (heroShoots && timerTillNextShootingAllowed >= 1.0) {
                 hero.shoot();
                 bullets.emplace_back(hero.x, hero.y, speedOfBullet);
 
@@ -218,14 +219,12 @@ int main()
                 timerTillNextShootingAllowed = 0;
             }
 
-            timerTillNextShootingAllowed += 0.0000000001;
+            timerTillNextShootingAllowed += 0.1;
         } else {
             //hero out of arsenal
             shootCircle.move(glm::vec2(hero.x, -0.8));
             shootCircle.draw();
         }
-
-        std::cout << timerTillNextShootingAllowed << (timerTillNextShootingAllowed - 1.0 <= 0.01) << std::endl;
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
