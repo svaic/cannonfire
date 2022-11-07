@@ -24,7 +24,7 @@ public:
     MovableObject(float initX, float initY, float initSpeed, float initWidth = 1, float initHeight = 1);
     void moveRandom(bool changeSide);
     void move_x(float offset);
-    void move_y(float offset);
+    void move_y();
     void changePosition();
 
     bool collide(MovableObject & other) {

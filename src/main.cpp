@@ -195,7 +195,7 @@ int main()
                 greenCircle.draw();
             }
 
-            bullets[i].move_y(speedOfBullet);
+            bullets[i].move_y();
             shootCircle.move(glm::vec2(bullets[i].x , bullets[i].y));
             shootCircle.draw();
         }
@@ -205,11 +205,9 @@ int main()
         heroContainer.move(glm::vec2(hero.x, hero.y));
         heroContainer.draw();
 
-        bool heroShoots = shootClicked(window);
-
         // hero shoots
         if (hero.canShoot()) {
-            if (heroShoots && timerTillNextShootingAllowed >= 1.0) {
+            if (shootClicked(window) && timerTillNextShootingAllowed >= 1.0) {
                 hero.shoot();
                 bullets.emplace_back(hero.x, hero.y, speedOfBullet);
 

@@ -35,8 +35,8 @@ void MovableObject::move_x(float offset) {
     x += offset;
 }
 
-void MovableObject::move_y(float offset) {
-    y += offset;
+void MovableObject::move_y() {
+    y += speed;
 }
 
 void MovableObject::changePosition() {
