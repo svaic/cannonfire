@@ -27,11 +27,7 @@ public:
     void move_y();
     void changePosition();
 
-    bool collide(MovableObject & other) {
-        return this->x <= other.x + other.width && this->x >= other.x - other.width && std::abs(this->y - other.y) <= 0.05;
-    }
-
-    bool inside(MovableObject & other, bool xAxis);
+    bool collide(MovableObject & other);
     void hit();
     void shoot();
     bool canShoot();

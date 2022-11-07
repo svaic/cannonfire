@@ -43,19 +43,14 @@ void MovableObject::changePosition() {
     if (iteration == 10) {
         iteration = 0;
 
-        speed = RandomUtility().getRandomFloat(0.05, 0.01);
+        speed = RandomUtility::getRandomFloat(0.05, 0.01);
 
-        int shouldChangeDirectionCoinFlip = RandomUtility().getRandomInt(0,10);
+        int shouldChangeDirectionCoinFlip = RandomUtility::getRandomInt(0,10);
         if (shouldChangeDirectionCoinFlip > 7)
             left = !left;
     }
     iteration++;
 }
-
-bool MovableObject::inside(MovableObject &other, bool xAxis) {
-        if (xAxis) return this->x <= other.x + other.width && this->x >= other.x - other.width;
-        return false;
-    }
 
 void MovableObject::hit() {
     health -=0.01;
@@ -70,4 +65,8 @@ void MovableObject::shoot() {
 
 bool MovableObject::canShoot() {
     return arsenal > 0;
+}
+
+bool MovableObject::collide(MovableObject &other)  {
+    return this->x <= other.x + other.width && this->x >= other.x - other.width && std::abs(this->y - other.y) <= 0.05;
 }
