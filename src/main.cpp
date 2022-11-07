@@ -162,18 +162,25 @@ int main()
         heroArsenalBarRectangle.transform(glm::vec2(-1.0, -0.8), glm::vec2(hero.arsenal, 1.0), 0);
         heroArsenalBarRectangle.draw();
 
+        // check if bullets collide with obstacle, current implementation o(n^2)
         for (auto & obstacle : obstacles) {
             obstacle.moveRandom(false);
             obstacleRectangle.transform(glm::vec2(obstacle.x , obstacle.y), glm::vec2(obstacle.width, obstacle.height), 0);
             obstacleRectangle.draw();
 
+            // std::cout << "Obstacle: " << obstacle.x << " " << obstacle.y << std::endl;
+
             for (int i = 0; i < bullets.size(); ++i) {
-                if (obstacle.collide(bullets[i], true)) {
+                if (bullets[i].collide(obstacle, true)) {
                     bullets.erase(bullets.begin()+i);
+
+                    std::cout << "Obstacle: " << obstacle.x << " " << obstacle.y << " " << obstacle.width << std::endl;
+                    std::cout << "Bullet:" << i << ": " << bullets[i].x << " " << bullets[i].y << std::endl;
                 }
             }
         }
 
+        // animate bullets
         for (int i=0; i < bullets.size(); i++) {
             if (bullets[i].y > 1.0) {
                 bullets.erase(bullets.begin()+i);
@@ -182,8 +189,11 @@ int main()
             bullets[i].move_y(speedOfBullet);
             shootCircle.move(glm::vec2(bullets[i].x , bullets[i].y));
             shootCircle.draw();
+
+            //std::cout << "Bullet:" << i << ": " << bullets[i].x << " " << bullets[i].y << std::endl;
         }
 
+        // hero animation
         listenToMoveHero(window, hero);
         heroContainer.move(glm::vec2(hero.x, hero.y));
         heroContainer.draw();
@@ -205,6 +215,7 @@ int main()
 
                 float minY = 1.0;
 
+                // find if obstacle blocks bullet todo: maybe redundant
                 for (auto & obstacle : obstacles) {
                     if (hero.inside(obstacle, true)) {
                         minY = std::min(minY, obstacle.y);
@@ -212,10 +223,12 @@ int main()
                     }
                 }
 
+                // bullet hit obstacle
                 if (obstaclePreventsShoot) {
                     shootCircle.move(glm::vec2(hero.x ,minY + 0.01));
                     shootCircle.draw();
                 }
+                // enemy hit
                 else if (hero.collide(enemy, true)) {
                     greenCircle.move(glm::vec2(enemy.x, enemy.y));
                     greenCircle.draw();
