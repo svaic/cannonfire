@@ -36,6 +36,8 @@ float speedOfObstacles = 0.005;
 
 float speedOfBullet = 0.05;
 
+float timerTillNextShootingAllowed = 0.0;
+
 GLFWwindow* load() {
     // glfw: initialize and configure
     // ------------------------------
@@ -127,7 +129,7 @@ int main()
     }
 
     MovableObject hero = MovableObject(0.0, -1.0, 0.01);
-    MovableObject enemy = MovableObject(0.0, 1.0, 0.02);
+    MovableObject enemy = MovableObject(0.0, 1.0, 0.02, 0.05, 0.05);
 
     ShapeContainer heroContainer;
     heroContainer.add(&heroCanonEdgeRectangle);
@@ -168,17 +170,16 @@ int main()
             obstacleRectangle.transform(glm::vec2(obstacle.x , obstacle.y), glm::vec2(obstacle.width, obstacle.height), 0);
             obstacleRectangle.draw();
 
-            // std::cout << "Obstacle: " << obstacle.x << " " << obstacle.y << std::endl;
-
             for (int i = 0; i < bullets.size(); ++i) {
-                if (bullets[i].collide(obstacle, true)) {
+                if (bullets[i].collide(obstacle)) {
                     bullets.erase(bullets.begin()+i);
-
-                    std::cout << "Obstacle: " << obstacle.x << " " << obstacle.y << " " << obstacle.width << std::endl;
-                    std::cout << "Bullet:" << i << ": " << bullets[i].x << " " << bullets[i].y << std::endl;
                 }
             }
         }
+
+        enemy.moveRandom(true);
+        enemyCircle.move(glm::vec2(enemy.x, enemy.y));
+        enemyCircle.draw();
 
         // animate bullets
         for (int i=0; i < bullets.size(); i++) {
@@ -186,11 +187,17 @@ int main()
                 bullets.erase(bullets.begin()+i);
             }
 
+            if (bullets[i].collide(enemy)) {
+                bullets.erase(bullets.begin()+i);
+
+                enemy.hit();
+                greenCircle.move(glm::vec2(enemy.x, enemy.y));
+                greenCircle.draw();
+            }
+
             bullets[i].move_y(speedOfBullet);
             shootCircle.move(glm::vec2(bullets[i].x , bullets[i].y));
             shootCircle.draw();
-
-            //std::cout << "Bullet:" << i << ": " << bullets[i].x << " " << bullets[i].y << std::endl;
         }
 
         // hero animation
@@ -198,13 +205,8 @@ int main()
         heroContainer.move(glm::vec2(hero.x, hero.y));
         heroContainer.draw();
 
-        enemy.moveRandom(true);
-        enemyCircle.move(glm::vec2(enemy.x, enemy.y));
-        enemyCircle.draw();
-
         bool heroShoots = shootClicked(window);
 
-        bool obstaclePreventsShoot = false;
         if (hero.canShoot()) {
             if (heroShoots) {
                 hero.shoot();
@@ -213,33 +215,17 @@ int main()
                 shootCircle.move(glm::vec2(hero.x, hero.y));
                 shootCircle.draw();
 
-                float minY = 1.0;
-
-                // find if obstacle blocks bullet todo: maybe redundant
-                for (auto & obstacle : obstacles) {
-                    if (hero.inside(obstacle, true)) {
-                        minY = std::min(minY, obstacle.y);
-                        obstaclePreventsShoot = true;
-                    }
-                }
-
-                // bullet hit obstacle
-                if (obstaclePreventsShoot) {
-                    shootCircle.move(glm::vec2(hero.x ,minY + 0.01));
-                    shootCircle.draw();
-                }
-                // enemy hit
-                else if (hero.collide(enemy, true)) {
-                    greenCircle.move(glm::vec2(enemy.x, enemy.y));
-                    greenCircle.draw();
-                    enemy.hit();
-                }
+                timerTillNextShootingAllowed = 0;
             }
+
+            timerTillNextShootingAllowed += 0.0000000001;
         } else {
             //hero out of arsenal
             shootCircle.move(glm::vec2(hero.x, -0.8));
             shootCircle.draw();
         }
+
+        std::cout << timerTillNextShootingAllowed << (timerTillNextShootingAllowed - 1.0 <= 0.01) << std::endl;
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

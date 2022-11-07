@@ -27,9 +27,8 @@ public:
     void move_y(float offset);
     void changePosition();
 
-    bool collide(MovableObject & other, bool xAxis) {
-        if (xAxis) return this->x + this->width + 0.1 <= other.x && this->x - this->width - 0.1 <= other.x && abs(this->y - other.y) < 0.1;
-        else return abs(this->y - other.y) < 0.1;
+    bool collide(MovableObject & other) {
+        return this->x <= other.x + other.width && this->x >= other.x - other.width && std::abs(this->y - other.y) <= 0.05;
     }
 
     bool inside(MovableObject & other, bool xAxis);
