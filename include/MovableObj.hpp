@@ -7,8 +7,10 @@
 
 
 #include "RandomUtility.hpp"
+#include "Shape.hpp"
+#include "ShapeContainer.hpp"
 
-class MovableObject {
+class MovableObject : public ShapeContainer {
 private:
     float speed;
     bool left;
@@ -22,15 +24,16 @@ public:
     float arsenal;
 
     MovableObject(float initX, float initY, float initSpeed, float initWidth = 1, float initHeight = 1);
-    void moveRandom(bool changeSide);
-    void move_x(float offset);
-    void move_y();
-    void changePosition();
-
+    void moveRandomX(bool changeSide);
+    void moveX(float offset);
+    void moveY(float offset = -1);
+    void changeWidth(float width);
+    void changeSide();
     bool collide(MovableObject & other);
     void hit();
     void shoot();
     bool canShoot();
+    void draw();
 };
 
 

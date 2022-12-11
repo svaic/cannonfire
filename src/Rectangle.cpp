@@ -46,7 +46,7 @@ RectangleShape::RectangleShape(std::vector<float> vertices, std::vector<int> ind
 }
 
 void RectangleShape::draw() {
-    //move_x(position);
+    //moveX(position);
     VaoModel::draw();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }

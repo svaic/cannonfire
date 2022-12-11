@@ -10,16 +10,19 @@
 #include "Shape.hpp"
 
 class ShapeContainer {
-private:
+protected:
     std::vector<Shape*> shapes;
-public:
-    static unsigned int shaderId;
-    void add(Shape* shape);
+protected:
     void draw();
     void transform(glm::vec2 move, glm::vec2 scale, float angle);
     void move(glm::vec2 move);
     void scale(glm::vec2 scale);
     void rotate(float angle);
+public:
+    static unsigned int shaderId;
+    void add(Shape* shape);
+    void remove(int i);
+
     static void setShaderId(unsigned int id);
 };
 

@@ -16,8 +16,8 @@ MovableObject::MovableObject(float initX, float initY, float initSpeed, float in
     arsenal = 1;
 }
 
-void MovableObject::moveRandom(bool changeSide) {
-    if (changeSide) changePosition();
+void MovableObject::moveRandomX(bool changeSideRandom) {
+    if (changeSideRandom) changeSide();
     if (x - speed <= -1.00 && left == true) {
         left = false;
     }
@@ -25,21 +25,29 @@ void MovableObject::moveRandom(bool changeSide) {
         left = true;
     }
     if (left) {
-        x = x - speed;
+        moveX(-speed);
     } else {
-        x = x + speed;
+        moveX(speed);
     }
 }
 
-void MovableObject::move_x(float offset) {
+void MovableObject::moveX(float offset) {
     x += offset;
+
+    draw();
 }
 
-void MovableObject::move_y() {
-    y += speed;
+void MovableObject::moveY(float offset) {
+    if (offset == -1) {
+        y += speed;
+    } else {
+        y += offset;
+    }
+
+    draw();
 }
 
-void MovableObject::changePosition() {
+void MovableObject::changeSide() {
     if (iteration == 10) {
         iteration = 0;
 
@@ -69,4 +77,13 @@ bool MovableObject::canShoot() {
 
 bool MovableObject::collide(MovableObject &other)  {
     return this->x <= other.x + other.width && this->x >= other.x - other.width && std::abs(this->y - other.y) <= 0.05;
+}
+
+void MovableObject::draw() {
+    transform(glm::vec2(x, y), glm::vec2(width, height), 0);
+}
+
+void MovableObject::changeWidth(float width) {
+    this->width = width;
+    draw();
 }

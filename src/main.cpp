@@ -121,20 +121,30 @@ int main()
 
     std::vector<MovableObject> obstacles;
     for (int i = 0; i < numberOfObstacles; ++i) {
-        float initX = RandomUtility::getRandomFloat(-0.5, 0.5);
-        float initY = RandomUtility::getRandomFloat(-0.3, 0.7);
-        float initWidth = RandomUtility::getRandomFloat(0.1, 0.4);
+        float initX = RandomUtility::getRandomFloat(-0.8, 0.8);
+        float initY = RandomUtility::getRandomFloat(-0.5, 0.7);
+        float initWidth = RandomUtility::getRandomFloat(0.1, 0.6);
+        float speed = RandomUtility::getRandomFloat(0.005, 0.01);
 
-        obstacles.emplace_back(initX,  initY, speedOfObstacles, initWidth, 1);
+        MovableObject obstacle = MovableObject(initX,  initY, speed, initWidth, 1);
+        obstacle.add(&obstacleRectangle);
+
+        obstacles.push_back(obstacle);
     }
 
     MovableObject hero = MovableObject(0.0, -1.0, 0.01);
-    MovableObject enemy = MovableObject(0.0, 1.0, 0.02, 0.05, 0.05);
+    hero.add(&heroCanonEdgeRectangle);
+    hero.add(&heroCanonRectangle);
+    hero.add(&heroCircle);
 
-    ShapeContainer heroContainer;
-    heroContainer.add(&heroCanonEdgeRectangle);
-    heroContainer.add(&heroCanonRectangle);
-    heroContainer.add(&heroCircle);
+    MovableObject enemy = MovableObject(0.0, 1.0, 0.02, 1.0, 1.0);
+    enemy.add(&enemyCircle);
+
+    MovableObject heroArsenalBar = MovableObject(-1.0, -0.8, 0, 1.0, 1.0);
+    heroArsenalBar.add(&heroArsenalBarRectangle);
+
+    MovableObject enemyHealthBar = MovableObject(-1.0, 0.8, 0, 1.0, 1.0);
+    enemyHealthBar.add(&enemyHealthBarRectangle);
 
     ourShader.use();
     Shape::setShaderId(ourShader.ID);
@@ -158,28 +168,28 @@ int main()
             hero.arsenal= 1.0;
         }
 
-        enemyHealthBarRectangle.transform(glm::vec2(-1.0, 0.8), glm::vec2(enemy.health, 1.0), 0);
-        enemyHealthBarRectangle.draw();
+        enemyHealthBar.changeWidth(enemy.health);
 
-        heroArsenalBarRectangle.transform(glm::vec2(-1.0, -0.8), glm::vec2(hero.arsenal, 1.0), 0);
-        heroArsenalBarRectangle.draw();
+        heroArsenalBar.changeWidth(hero.arsenal);
 
         // check if bullets collide with obstacle, current implementation o(n^2)
-        for (auto & obstacle : obstacles) {
-            obstacle.moveRandom(false);
-            obstacleRectangle.transform(glm::vec2(obstacle.x , obstacle.y), glm::vec2(obstacle.width, obstacle.height), 0);
-            obstacleRectangle.draw();
+        for (int i = 0; i < obstacles.size(); i++) {
+            obstacles[i].moveRandomX(false);
 
-            for (int i = 0; i < bullets.size(); ++i) {
-                if (bullets[i].collide(obstacle)) {
+            for (int j = 0; j < bullets.size(); ++j) {
+                if (bullets[j].collide(obstacles[j])) {
+
+                    obstacles[j].health -= 0.5;
                     bullets.erase(bullets.begin()+i);
+
+                    if (obstacles[j].health <= 0) {
+                        obstacles.erase(obstacles.begin()+j);
+                    }
                 }
             }
         }
 
-        enemy.moveRandom(true);
-        enemyCircle.move(glm::vec2(enemy.x, enemy.y));
-        enemyCircle.draw();
+        enemy.moveRandomX(true);
 
         // animate bullets
         for (int i=0; i < bullets.size(); i++) {
@@ -190,29 +200,29 @@ int main()
             if (bullets[i].collide(enemy)) {
                 bullets.erase(bullets.begin()+i);
 
+                enemy.add(&greenCircle);
                 enemy.hit();
-                greenCircle.move(glm::vec2(enemy.x, enemy.y));
-                greenCircle.draw();
+                enemy.draw();
+                enemy.remove(1);
             }
 
-            bullets[i].move_y();
-            shootCircle.move(glm::vec2(bullets[i].x , bullets[i].y));
-            shootCircle.draw();
+            bullets[i].moveY();
         }
 
         // hero animation
         listenToMoveHero(window, hero);
-        heroContainer.move(glm::vec2(hero.x, hero.y));
-        heroContainer.draw();
+        hero.draw();
 
         // hero shoots
         if (hero.canShoot()) {
             if (shootClicked(window) && timerTillNextShootingAllowed >= 1.0) {
                 hero.shoot();
-                bullets.emplace_back(hero.x, hero.y, speedOfBullet);
 
-                shootCircle.move(glm::vec2(hero.x, hero.y));
-                shootCircle.draw();
+                MovableObject bullet = MovableObject(hero.x, hero.y, speedOfBullet);
+                bullet.add(&shootCircle);
+                bullet.draw();
+
+                bullets.push_back(bullet);
 
                 timerTillNextShootingAllowed = 0;
             }
@@ -220,8 +230,9 @@ int main()
             timerTillNextShootingAllowed += 0.1;
         } else {
             //hero out of arsenal
-            shootCircle.move(glm::vec2(hero.x, -0.8));
-            shootCircle.draw();
+            hero.add(&shootCircle);
+            hero.draw();
+            hero.remove(1);
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -251,10 +262,10 @@ int main()
 void listenToMoveHero(GLFWwindow *window, MovableObject &object)
 {
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        object.move_x(-0.01);
+        object.moveX(-0.01);
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        object.move_x(0.01);
+        object.moveX(0.01);
     }
 }
 

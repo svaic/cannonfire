@@ -39,3 +39,7 @@ void ShapeContainer::rotate(float angle) {
 void ShapeContainer::setShaderId(unsigned int id) {
     shaderId = id;
 }
+
+void ShapeContainer::remove(int i) {
+    shapes.erase(shapes.begin() + i);
+}
