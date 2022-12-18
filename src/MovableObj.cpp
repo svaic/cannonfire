@@ -1,7 +1,3 @@
-//
-// Created by ljovanov on 05.11.2022.
-//
-
 #include "MovableObj.hpp"
 
 MovableObject::MovableObject(float initX, float initY, float initSpeed, float initWidth, float initHeight) {
@@ -60,7 +56,7 @@ void MovableObject::changeSide() {
     iteration++;
 }
 
-void MovableObject::hit() {
+void MovableObject::reduceHealth() {
     health -=0.01;
 }
 
@@ -83,7 +79,11 @@ void MovableObject::draw() {
     transform(glm::vec2(x, y), glm::vec2(width, height), 0);
 }
 
-void MovableObject::changeWidth(float width) {
-    this->width = width;
+void MovableObject::changeWidth(float newWidth) {
+    this->width = newWidth;
     draw();
+}
+
+void MovableObject::changeSpeed(float newSpeed) {
+    this->speed = newSpeed;
 }

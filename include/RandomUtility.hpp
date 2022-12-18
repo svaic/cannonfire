@@ -16,6 +16,8 @@ public:
     static float getRandomFloat(float min, float max);
 
     static int getRandomInt(int min, int max);
+
+    static bool getRandomBool();
 };
 
 

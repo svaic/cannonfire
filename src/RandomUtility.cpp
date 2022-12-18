@@ -13,3 +13,8 @@ int RandomUtility::getRandomInt(int min, int max) {
     std::uniform_int_distribution<int> unii(min, max);
     return unii(randomEngine);
 }
+
+bool RandomUtility::getRandomBool() {
+    std::bernoulli_distribution unib;
+    return unib(randomEngine);
+}

@@ -27,10 +27,11 @@ public:
     void moveRandomX(bool changeSide);
     void moveX(float offset);
     void moveY(float offset = -1);
-    void changeWidth(float width);
+    void changeSpeed(float newSpeed);
+    void changeWidth(float newWidth);
     void changeSide();
     bool collide(MovableObject & other);
-    void hit();
+    void reduceHealth();
     void shoot();
     bool canShoot();
     void draw();

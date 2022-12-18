@@ -15,6 +15,8 @@
 #include "MovableObj.hpp"
 #include "Color.hpp"
 #include "ShapeContainer.hpp"
+#include "Obstacle.hpp"
+#include "DefaultShape.hpp"
 
 const std::string program_name = ("GLSL Shader class example");
 
@@ -31,8 +33,12 @@ const unsigned int SCR_HEIGHT = 1200;
 unsigned int Shape::shaderId = -1;
 unsigned int ShapeContainer::shaderId = -1;
 
+RectangleShape* DefaultShape::greenObstacle = nullptr;
+RectangleShape* DefaultShape::redObstacle = nullptr;
+RectangleShape* DefaultShape::blackObstacle = nullptr;
+
 int numberOfObstacles = 3;
-float speedOfObstacles = 0.005;
+float maxSpeedOfEnemy = 0.05;
 
 float speedOfBullet = 0.05;
 
@@ -108,7 +114,14 @@ int main()
     RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(healthBarVertices, Color::DARK_RED);
     RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(healthBarVertices, Color::YELLOW);
 
-    RectangleShape obstacleRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::BLACK);
+    RectangleShape obstacleBlackRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::BLACK);
+    RectangleShape obstacleGreenRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::GREEN);
+    RectangleShape obstacleRedRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::DARK_RED);
+
+    DefaultShape::setBlackObstacle(obstacleBlackRectangle);
+    DefaultShape::setGreenObstacle(obstacleGreenRectangle);
+    DefaultShape::setRedObstacle(obstacleRedRectangle);
+
     RectangleShape heroCanonRectangle = RectangleShape::createRectangle(0.2, 0.075, Color::GREY);
 
     std::vector<float> heroCanonEdgeVertices {
@@ -117,19 +130,12 @@ int main()
             -0.1f, 0.2f,// bottom left
             -0.1f,  0.25f,// top left
     };
+
     RectangleShape heroCanonEdgeRectangle = RectangleShape::createRectangle(heroCanonEdgeVertices, Color::DARK_GREY);
 
-    std::vector<MovableObject> obstacles;
+    std::vector<Obstacle> obstacles;
     for (int i = 0; i < numberOfObstacles; ++i) {
-        float initX = RandomUtility::getRandomFloat(-0.8, 0.8);
-        float initY = RandomUtility::getRandomFloat(-0.5, 0.7);
-        float initWidth = RandomUtility::getRandomFloat(0.1, 0.6);
-        float speed = RandomUtility::getRandomFloat(0.005, 0.01);
-
-        MovableObject obstacle = MovableObject(initX,  initY, speed, initWidth, 1);
-        obstacle.add(&obstacleRectangle);
-
-        obstacles.push_back(obstacle);
+        obstacles.emplace_back();
     }
 
     MovableObject hero = MovableObject(0.0, -1.0, 0.01);
@@ -137,7 +143,7 @@ int main()
     hero.add(&heroCanonRectangle);
     hero.add(&heroCircle);
 
-    MovableObject enemy = MovableObject(0.0, 1.0, 0.02, 1.0, 1.0);
+    MovableObject enemy = MovableObject(0.0, 1.0, maxSpeedOfEnemy * 0.1f, 1.0, 1.0);
     enemy.add(&enemyCircle);
 
     MovableObject heroArsenalBar = MovableObject(-1.0, -0.8, 0, 1.0, 1.0);
@@ -177,16 +183,20 @@ int main()
             obstacles[i].moveRandomX(false);
 
             for (int j = 0; j < bullets.size(); ++j) {
-                if (bullets[j].collide(obstacles[j])) {
 
-                    obstacles[j].health -= 0.5;
+                if (bullets[j].collide((obstacles[i]))) {
+
                     bullets.erase(bullets.begin()+i);
 
-                    if (obstacles[j].health <= 0) {
+                    if (obstacles[j].reduceHealth()) {
                         obstacles.erase(obstacles.begin()+j);
                     }
                 }
             }
+        }
+
+        if(obstacles.size() < numberOfObstacles) {
+            obstacles.emplace_back();
         }
 
         enemy.moveRandomX(true);
@@ -201,7 +211,8 @@ int main()
                 bullets.erase(bullets.begin()+i);
 
                 enemy.add(&greenCircle);
-                enemy.hit();
+                enemy.reduceHealth();
+                enemy.changeSpeed(1/enemy.health * maxSpeedOfEnemy);
                 enemy.draw();
                 enemy.remove(1);
             }
@@ -228,6 +239,7 @@ int main()
             }
 
             timerTillNextShootingAllowed += 0.1;
+
         } else {
             //hero out of arsenal
             hero.add(&shootCircle);
@@ -249,7 +261,7 @@ int main()
     enemyCircle.destructor();
     greenCircle.destructor();
     enemyHealthBarRectangle.destructor();
-    obstacleRectangle.destructor();
+    obstacleBlackRectangle.destructor();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
