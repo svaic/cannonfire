@@ -28,7 +28,7 @@ unsigned int seed = static_cast<long int>(std::time(nullptr));
 std::mt19937_64 RandomUtility::randomEngine = std::mt19937_64(size_t(seed));
 
 const unsigned int SCR_WIDTH = 1200;
-const unsigned int SCR_HEIGHT = 1200;
+const unsigned int SCR_HEIGHT = 800;
 
 unsigned int Shape::shaderId = -1;
 unsigned int ShapeContainer::shaderId = -1;
@@ -249,7 +249,7 @@ int main()
                 hero.health -=0.02f;
             }
 
-            if (bulletsOfEnemy[i].y <= 1.0) {
+            if (bulletsOfEnemy[i].y <= -1.0) {
                 bulletsOfEnemy.erase(bulletsOfEnemy.begin() + i);
             }
         }
