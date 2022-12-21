@@ -57,7 +57,7 @@ void MovableObject::changeSide() {
 }
 
 void MovableObject::reduceHealth() {
-    health -=0.01;
+    health -=0.05;
 }
 
 void MovableObject::shoot() {
@@ -72,7 +72,7 @@ bool MovableObject::canShoot() {
 }
 
 bool MovableObject::collide(MovableObject &other)  {
-    return this->x <= other.x + other.width && this->x >= other.x - other.width && std::abs(this->y - other.y) <= 0.05;
+    return this->x <= other.x + other.width + 0.15 && this->x >= other.x - other.width - 0.15 && std::abs(this->y - other.y) <= 0.05 ;
 }
 
 void MovableObject::draw() {

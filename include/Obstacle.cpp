@@ -10,11 +10,12 @@ Obstacle::Obstacle()
                   RandomUtility::getRandomFloat(0.1,0.6),
                   RandomUtility::getRandomFloat(0.5,3.0)) {
 
-    canBeDestroyed = RandomUtility::getRandomBool();
+    canBeDestroyed = true;//RandomUtility::getRandomBool();
+    health = RandomUtility::getRandomFloat(0.5, 1.0);
 
     //RectangleShape shape = RectangleShape::createRectangle(1.00, 1.00, Color::BLACK);
     if (canBeDestroyed) {
-        add(DefaultShape::redObstacle);
+        add(DefaultShape::blackObstacle);
     } else {
         add(DefaultShape::blackObstacle);
     }
@@ -39,12 +40,16 @@ void Obstacle::move() {
 
 bool Obstacle::reduceHealth() {
     if(canBeDestroyed) {
-        health -= 0.25;
+        health -= 0.15;
+
         if(health <= 0.7 && health > 0.4) {
-            changeColor(Color::GREEN);
-        } else if (health <= 0.4) {
             changeColor(Color::RED);
+        } else if (health <= 0.4) {
+            changeColor(Color::GREEN);
         }
+
+        height = health;
+
         if (health <= 0) return true;
         else return false;
     }

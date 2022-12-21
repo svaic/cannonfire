@@ -102,7 +102,9 @@ int main()
 
     Circle greenCircle = Circle::createCircle(0.05, Color::GREEN);
 
-    Circle shootCircle = Circle::createCircle(0.05, Color::YELLOW);
+    Circle shootCircle = Circle::createCircle(1.0, Color::YELLOW);
+
+    Circle outOfArsenal = Circle::createCircle(0.05, Color::YELLOW);
 
     std::vector<float> healthBarVertices {
             0.5f,  0.01f, // top right
@@ -111,8 +113,16 @@ int main()
             -0.5f,  0.01f,// top left
     };
 
-    RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(healthBarVertices, Color::DARK_RED);
-    RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(healthBarVertices, Color::YELLOW);
+    std::vector<float> rectangleFullSize {
+            1.0f,  1.0f, // top right
+            1.0f, -1.0f, // bottom right
+            -1.0f, -1.0f,// bottom left
+            -1.0f,  1.00f,// top left
+    };
+
+    RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::DARK_RED);
+    RectangleShape enemyStatsBackground = RectangleShape::createRectangle(rectangleFullSize, Color::BLACK);
+    RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::YELLOW);
 
     RectangleShape obstacleBlackRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::BLACK);
     RectangleShape obstacleGreenRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::GREEN);
@@ -138,18 +148,18 @@ int main()
         obstacles.emplace_back();
     }
 
-    MovableObject hero = MovableObject(0.0, -1.0, 0.01);
+    MovableObject hero = MovableObject(0.0, -0.95, 0.01);
     hero.add(&heroCanonEdgeRectangle);
     hero.add(&heroCanonRectangle);
     hero.add(&heroCircle);
 
-    MovableObject enemy = MovableObject(0.0, 1.0, maxSpeedOfEnemy * 0.1f, 1.0, 1.0);
+    MovableObject enemy = MovableObject(0.0, 0.9, maxSpeedOfEnemy * 0.1f, 1.0, 1.0);
     enemy.add(&enemyCircle);
 
-    MovableObject heroArsenalBar = MovableObject(-1.0, -0.8, 0, 1.0, 1.0);
+    MovableObject heroArsenalBar = MovableObject(-1.0, -0.95, 0, 1.0, 0.05);
     heroArsenalBar.add(&heroArsenalBarRectangle);
 
-    MovableObject enemyHealthBar = MovableObject(-1.0, 0.8, 0, 1.0, 1.0);
+    MovableObject enemyHealthBar = MovableObject(-1.0, 0.95, 0, 1.0, 0.05);
     enemyHealthBar.add(&enemyHealthBarRectangle);
 
     ourShader.use();
@@ -174,10 +184,6 @@ int main()
             hero.arsenal= 1.0;
         }
 
-        enemyHealthBar.changeWidth(enemy.health);
-
-        heroArsenalBar.changeWidth(hero.arsenal);
-
         // check if bullets collide with obstacle, current implementation o(n^2)
         for (int i = 0; i < obstacles.size(); i++) {
             obstacles[i].moveRandomX(false);
@@ -186,10 +192,10 @@ int main()
 
                 if (bullets[j].collide((obstacles[i]))) {
 
-                    bullets.erase(bullets.begin()+i);
+                    bullets.erase(bullets.begin()+j);
 
-                    if (obstacles[j].reduceHealth()) {
-                        obstacles.erase(obstacles.begin()+j);
+                    if (obstacles[i].reduceHealth()) {
+                        obstacles.erase(obstacles.begin()+i);
                     }
                 }
             }
@@ -207,7 +213,7 @@ int main()
                 bullets.erase(bullets.begin()+i);
             }
 
-            if (bullets[i].collide(enemy)) {
+            if (enemy.collide(bullets[i])) {
                 bullets.erase(bullets.begin()+i);
 
                 enemy.add(&greenCircle);
@@ -229,7 +235,7 @@ int main()
             if (shootClicked(window) && timerTillNextShootingAllowed >= 1.0) {
                 hero.shoot();
 
-                MovableObject bullet = MovableObject(hero.x, hero.y, speedOfBullet);
+                MovableObject bullet = MovableObject(hero.x, hero.y, speedOfBullet, 0.05, 0.05);
                 bullet.add(&shootCircle);
                 bullet.draw();
 
@@ -242,10 +248,20 @@ int main()
 
         } else {
             //hero out of arsenal
-            hero.add(&shootCircle);
+            hero.add(&outOfArsenal);
             hero.draw();
-            hero.remove(1);
+            hero.remove(3);
         }
+
+        enemyStatsBackground.transform(glm::vec2(0.0, 0.95), glm::vec2(1.0, 0.05),0);
+        enemyStatsBackground.draw();
+
+
+        enemyStatsBackground.transform(glm::vec2(0.0, -0.95), glm::vec2(1.0, 0.05),0);
+        enemyStatsBackground.draw();
+
+        enemyHealthBar.changeWidth(enemy.health * 2);
+        heroArsenalBar.changeWidth(hero.arsenal * 2);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
