@@ -7,8 +7,8 @@ Obstacle::Obstacle()
   : MovableObject(RandomUtility::getRandomFloat(-2.5,-1.5),
                   RandomUtility::getRandomFloat(-0.5,0.7),
                   RandomUtility::getRandomFloat(0.005, 0.01),
-                  RandomUtility::getRandomFloat(0.1,0.6),
-                  RandomUtility::getRandomFloat(0.5,3.0)) {
+                  RandomUtility::getRandomFloat(0.2,0.2),
+                  RandomUtility::getRandomFloat(0.2,0.2)) {
 
     canBeDestroyed = true;//RandomUtility::getRandomBool();
     health = RandomUtility::getRandomFloat(0.5, 1.0);
@@ -48,7 +48,7 @@ bool Obstacle::reduceHealth() {
             changeColor(Color::GREEN);
         }
 
-        height = health;
+        //height = health;
 
         if (health <= 0) return true;
         else return false;
