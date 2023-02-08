@@ -4,7 +4,7 @@
 #include "Shape.hpp"
 #include "GLFW/glfw3.h"
 
-Circle::Circle(std::vector<float> vertices) : Shape(std::move(vertices)) {
+Circle::Circle(std::vector<float> vertices) : Shape(std::move(vertices), "") {
 }
 
 void Circle::draw() {

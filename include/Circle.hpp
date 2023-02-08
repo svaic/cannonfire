@@ -10,6 +10,7 @@ public:
     Circle(std::vector<float> vertices);
     void draw();
     static Circle createCircle(float radius, glm::vec3 color);
+    void useTexture();
 };
 
 

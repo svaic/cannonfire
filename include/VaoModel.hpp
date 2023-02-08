@@ -8,7 +8,7 @@ public:
     GLuint *VAO;
     GLuint *VBO;
 
-    VaoModel(std::vector<float> &vertices);
+    VaoModel(std::vector<float> &vertices, bool useTexture);
 
     virtual void draw();
 
