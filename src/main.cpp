@@ -109,15 +109,15 @@ int main()
 
     Circle heroCircle = Circle::createCircle(0.1, Color::BLACK);
 
-    /*  Circle enemyCircle = Circle::createCircle(0.1, Color::RED);
+    Circle enemyCircle = Circle::createCircle(0.1, Color::RED);
 
-      Circle greenCircle = Circle::createCircle(0.05, Color::GREEN);
+    Circle greenCircle = Circle::createCircle(0.05, Color::GREEN);
 
-      Circle shootCircle = Circle::createCircle(1.0, Color::YELLOW);
+    Circle shootCircle = Circle::createCircle(1.0, Color::YELLOW);
 
-      Circle outOfArsenal = Circle::createCircle(0.05, Color::YELLOW);
+    Circle outOfArsenal = Circle::createCircle(0.05, Color::YELLOW);
 
-      Circle enemyShootCircle = Circle::createCircle(1.00, Color::BLUE);*/
+    Circle enemyShootCircle = Circle::createCircle(1.00, Color::BLUE);
 
     std::vector<float> healthBarVertices {
             0.5f,  0.01f, // top right
@@ -133,20 +133,26 @@ int main()
             -1.0f,  1.00f,// top left
     };
 
-    RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::DARK_RED, "grogu.png");
-//    RectangleShape enemyStatsBackground = RectangleShape::createRectangle(rectangleFullSize, Color::BLACK);
-    RectangleShape heroHealthBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::GREEN, "");
-/*    RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::YELLOW);
+    RectangleShape enemyShootIcon = RectangleShape::createRectangle(rectangleFullSize, Color::DARK_RED, "helmet.png");
+    RectangleShape test = RectangleShape::createRectangle(rectangleFullSize, Color::WHITE, "grogu.png");
+    RectangleShape r2d2 = RectangleShape::createRectangle(rectangleFullSize, Color::WHITE, "r2d2.png");
+    MovableObject movableObject = MovableObject(0.0, 0.0, 0.01, 1.0, 1.0);
+    movableObject.add(&enemyShootIcon);
 
-    RectangleShape obstacleBlackRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::BLACK);
-    RectangleShape obstacleGreenRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::GREEN);
-    RectangleShape obstacleRedRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::DARK_RED);
+    RectangleShape enemyHealthBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::DARK_RED, "");
+    RectangleShape enemyStatsBackground = RectangleShape::createRectangle(rectangleFullSize, Color::BLACK, "");
+    RectangleShape heroHealthBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::GREEN, "");
+    RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::YELLOW, "");
+
+    RectangleShape obstacleBlackRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::BLACK, "w-wing");
+    RectangleShape obstacleGreenRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::GREEN, "");
+    RectangleShape obstacleRedRectangle = RectangleShape::createRectangle(0.02, 1.00, Color::DARK_RED, "");
 
     DefaultShape::setBlackObstacle(obstacleBlackRectangle);
     DefaultShape::setGreenObstacle(obstacleGreenRectangle);
     DefaultShape::setRedObstacle(obstacleRedRectangle);
 
-    RectangleShape heroCanonRectangle = RectangleShape::createRectangle(0.2, 0.075, Color::GREY);
+    RectangleShape heroCanonRectangle = RectangleShape::createRectangle(0.2, 0.075, Color::GREY, "");
 
     std::vector<float> heroCanonEdgeVertices {
             0.1f,  0.25f, // top right
@@ -155,33 +161,34 @@ int main()
             -0.1f,  0.25f,// top left
     };
 
-    RectangleShape heroCanonEdgeRectangle = RectangleShape::createRectangle(heroCanonEdgeVertices, Color::DARK_GREY);
+    RectangleShape heroCanonEdgeRectangle = RectangleShape::createRectangle(heroCanonEdgeVertices, Color::DARK_GREY, "");
 
     std::vector<Obstacle> obstacles;
     for (int i = 0; i < numberOfObstacles; ++i) {
         obstacles.emplace_back();
     }
-*/
-    MovableObject hero = MovableObject(0.0, -0.90, 0.01);
-  //  hero.add(&heroCanonEdgeRectangle);
-  //  hero.add(&heroCanonRectangle);
+
+    MovableObject hero = MovableObject(0.0, -0.80, 0.01, 0.3, 0.3);
+    //hero.add(&heroCanonEdgeRectangle);
+    //hero.add(&heroCanonRectangle)
+    hero.add(&test);
     hero.add(&heroCircle);
-/*
-    MovableObject enemy = MovableObject(0.0, 0.9, maxSpeedOfEnemy * 0.1f, 1.0, 1.0);
-    enemy.add(&enemyCircle);
+
+    MovableObject enemy = MovableObject(0.0, 0.8, maxSpeedOfEnemy * 0.1f, 0.10, 0.15);
+    enemy.add(&r2d2);
 
     MovableObject heroArsenalBar = MovableObject(-1.0, -0.95, 0, 1.0, 0.05);
-    heroArsenalBar.add(&heroArsenalBarRectangle);*/
+    heroArsenalBar.add(&heroArsenalBarRectangle);
 
-    MovableObject heroHealthBar = MovableObject(0.0, 0.0, 0, 0.5, 0.5);
+    MovableObject heroHealthBar = MovableObject(-1.0, -1.0, 0, 1.0, 0.05);
     heroHealthBar.add(&heroHealthBarRectangle);
 
-    MovableObject enemyHealthBar = MovableObject(0.0, 0.0, 0, 0.25, 0.25);
+    MovableObject enemyHealthBar = MovableObject(-1.0, 0.95, 0, 1.0, 0.05);
     enemyHealthBar.add(&enemyHealthBarRectangle);
 
-/*    ourShader.use();
-    Shape::setShaderId(ourShader.ID);
-    ShapeContainer::setShaderId(ourShader.ID);*/
+    ourShader2.use();
+    Shape::setShaderId(ourShader2.ID);
+    ShapeContainer::setShaderId(ourShader2.ID);
 
     std::vector<MovableObject> bulletsOfHero;
     std::vector<MovableObject> bulletsOfEnemy;
@@ -199,20 +206,16 @@ int main()
         glClearColor(whiteColor.x, whiteColor.y, whiteColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        ourShader.use();
+        ShapeContainer::setShaderId(ourShader.ID);
+
+        for (int i = 0; i < bulletsOfEnemy.size(); ++i) {
+            bulletsOfEnemy[i].draw();
+        }
 
         ourShader2.use();
         ShapeContainer::setShaderId(ourShader2.ID);
-        Shape::setShaderId(ourShader2.ID);
-
-        //hero.draw();
-        heroHealthBar.draw();
-
-        ourShader.use();
-        ShapeContainer::setShaderId(ourShader.ID);
-        Shape::setShaderId(ourShader.ID);
-        enemyHealthBar.draw();
-
-        /*
+        //movableObject.draw();
 
         if (enemy.health < 0) break;
         if (hero.health < 0) return 1;
@@ -242,7 +245,13 @@ int main()
             obstacles.emplace_back();
         }
 
+        ourShader.use();
+        ShapeContainer::setShaderId(ourShader.ID);
+
         enemy.moveRandomX(true);
+
+        ourShader2.use();
+        ShapeContainer::setShaderId(ourShader2.ID);
 
         // animate bulletsOfHero
         for (int i=0; i < bulletsOfHero.size(); i++) {
@@ -253,15 +262,23 @@ int main()
             if (enemy.collide(bulletsOfHero[i])) {
                 bulletsOfHero.erase(bulletsOfHero.begin() + i);
 
-                enemy.add(&greenCircle);
+                //enemy.add(&greenCircle);
                 enemy.reduceHealth();
                 enemy.changeSpeed(1/enemy.health * maxSpeedOfEnemy);
+
+                ourShader.use();
+                ShapeContainer::setShaderId(ourShader.ID);
+
                 enemy.draw();
-                enemy.remove(1);
+
+                ourShader2.use();
+                ShapeContainer::setShaderId(ourShader2.ID);
+
+                //enemy.remove(1);
 
                 //enemy shoots bullet
-                MovableObject bullet = MovableObject(enemy.x, enemy.y, speedOfBullet*1.5f, 0.15, 0.15);
-                bullet.add(&enemyShootCircle);
+                MovableObject bullet = MovableObject(enemy.x, enemy.y, speedOfBullet*1.5f, 0.15, 0.25);
+                bullet.add(&enemyShootIcon);
                 bulletsOfEnemy.push_back(bullet);
             }
 
@@ -270,11 +287,25 @@ int main()
 
         // animate bulletsOfEnemy
         for (int i = 0; i < bulletsOfEnemy.size(); ++i) {
+            ourShader.use();
+            ShapeContainer::setShaderId(ourShader.ID);
+
             bulletsOfEnemy[i].moveY(-0.01);
+
+            ourShader2.use();
+            ShapeContainer::setShaderId(ourShader2.ID);
 
             if (hero.collide(bulletsOfEnemy[i])) {
                 bulletsOfEnemy[i].add(&heroCircle);
+
+                /*ourShader.use();
+                ShapeContainer::setShaderId(ourShader.ID);
+                Shape::setShaderId(ourShader.ID);
+
                 bulletsOfEnemy[i].draw();
+
+                ourShader2.use();
+                ShapeContainer::setShaderId(ourShader2.ID);*/
                 hero.health -=0.02f;
             }
 
@@ -284,18 +315,15 @@ int main()
         }
 
         // hero animation
-        listenToMoveHero(window, hero);
-
-        ourShader2.use();
-        Shape::setShaderId(ourShader2.ID);
-        ShapeContainer::setShaderId(ourShader2.ID);
-
-
-        hero.draw();
 
         ourShader.use();
-        Shape::setShaderId(ourShader.ID);
         ShapeContainer::setShaderId(ourShader.ID);
+
+        listenToMoveHero(window, hero);
+        hero.draw();
+
+        ourShader2.use();
+        ShapeContainer::setShaderId(ourShader2.ID);
 
         // hero shoots
         if (hero.canShoot()) {
@@ -316,7 +344,14 @@ int main()
         } else {
             //hero out of arsenal
             hero.add(&outOfArsenal);
+
+            ourShader.use();
+            ShapeContainer::setShaderId(ourShader.ID);
+
             hero.draw();
+
+            ourShader2.use();
+            ShapeContainer::setShaderId(ourShader2.ID);
             hero.remove(3);
         }
 
@@ -329,7 +364,7 @@ int main()
 
         enemyHealthBar.changeWidth(enemy.health * 2);
         heroArsenalBar.changeWidth(hero.arsenal * 2);
-        heroHealthBar.changeWidth(hero.health * 2);*/
+        heroHealthBar.changeWidth(hero.health * 2);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -341,11 +376,11 @@ int main()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-/*    heroCircle.destructor();
+    heroCircle.destructor();
     enemyCircle.destructor();
     greenCircle.destructor();
     enemyHealthBarRectangle.destructor();
-    obstacleBlackRectangle.destructor();*/
+    obstacleBlackRectangle.destructor();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------

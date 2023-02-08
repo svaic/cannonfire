@@ -10,6 +10,7 @@
 class Shape : public VaoModel {
 public:
     static unsigned int shaderId;
+    unsigned int texture;
 
     Shape(std::vector<float> vertices, bool useTexture);
 
