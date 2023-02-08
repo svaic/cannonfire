@@ -5,10 +5,14 @@ void DefaultShape::setGreenObstacle(RectangleShape& newGreenObstacle)  {
     greenObstacle = &newGreenObstacle;
 }
 
-void DefaultShape::setBlackObstacle(RectangleShape &newBlackObstacle) {
+void DefaultShape::setYellowObstacle(RectangleShape &newBlackObstacle) {
     blackObstacle = &newBlackObstacle;
 }
 
 void DefaultShape::setRedObstacle(RectangleShape &newRedObstacle) {
     redObstacle = &newRedObstacle;
+}
+
+void DefaultShape::setAsteroidField(RectangleShape& newAsteroidField) {
+    asteroidField = &newAsteroidField;
 }

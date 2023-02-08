@@ -5,32 +5,31 @@
 
 Obstacle::Obstacle()
   : MovableObject(RandomUtility::getRandomFloat(-2.5,-1.5),
-                  RandomUtility::getRandomFloat(-0.5,0.7),
-                  RandomUtility::getRandomFloat(0.005, 0.01),
-                  RandomUtility::getRandomFloat(0.2,0.2),
-                  RandomUtility::getRandomFloat(0.2,0.2)) {
+                  RandomUtility::getRandomFloat(-0.3,0.5),
+                  RandomUtility::getRandomFloat(0.005, 0.01)) {
 
     canBeDestroyed = true;//RandomUtility::getRandomBool();
     health = RandomUtility::getRandomFloat(0.5, 1.0);
 
     //RectangleShape shape = RectangleShape::createRectangle(1.00, 1.00, Color::BLACK);
-    if (canBeDestroyed) {
-        add(DefaultShape::blackObstacle);
-    } else {
-        add(DefaultShape::blackObstacle);
-    }
-}
 
-void Obstacle::changeColor(glm::vec3 color) {
-    shapes.clear();
-    if (color == Color::BLACK) {
+    int randomPlanet = RandomUtility::getRandomInt(0,3);
+    if (randomPlanet == 0) {
         add(DefaultShape::blackObstacle);
-    }
-    if (color == Color::GREEN) {
+        width = 0.10;
+        height = 0.15;
+    } else if (randomPlanet == 1){
         add(DefaultShape::greenObstacle);
-    }
-    if (color == Color::RED) {
+        width = 0.05;
+        height = 0.10;
+    } else if (randomPlanet == 2) {
         add(DefaultShape::redObstacle);
+        width = 0.15;
+        height = 0.18;
+    } else {
+        add(DefaultShape::asteroidField);
+        width = 0.18;
+        height = 0.25;
     }
 }
 
@@ -43,9 +42,9 @@ bool Obstacle::reduceHealth() {
         health -= 0.15;
 
         if(health <= 0.7 && health > 0.4) {
-            changeColor(Color::RED);
+            //changeColor(Color::RED);
         } else if (health <= 0.4) {
-            changeColor(Color::GREEN);
+            //changeColor(Color::GREEN);
         }
 
         //height = health;

@@ -14,9 +14,11 @@ public:
     static RectangleShape* blackObstacle;
     static RectangleShape* greenObstacle;
     static RectangleShape* redObstacle;
-    static void setBlackObstacle(RectangleShape& newBlackObstacle);
+    static RectangleShape* asteroidField;
+    static void setYellowObstacle(RectangleShape& newBlackObstacle);
     static void setGreenObstacle(RectangleShape& newGreenObstacle);
     static void setRedObstacle(RectangleShape& newRedObstacle);
+    static void setAsteroidField(RectangleShape& newAsteroidField);
 };
 
 

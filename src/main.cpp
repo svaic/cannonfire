@@ -36,6 +36,7 @@ unsigned int ShapeContainer::shaderId = -1;
 RectangleShape* DefaultShape::greenObstacle = nullptr;
 RectangleShape* DefaultShape::redObstacle = nullptr;
 RectangleShape* DefaultShape::blackObstacle = nullptr;
+RectangleShape* DefaultShape::asteroidField = nullptr;
 
 int numberOfObstacles = 3;
 float maxSpeedOfEnemy = 0.05;
@@ -138,7 +139,7 @@ int main()
     };
 
     RectangleShape heroShootIcon = RectangleShape::createRectangle(rectangleFullSize, Color::DARK_RED, "bullet.png");
-    RectangleShape enemyShootIcon = RectangleShape::createRectangle(rectangleFullSize, Color::DARK_RED, "helmet.png");
+    RectangleShape enemyShootIcon = RectangleShape::createRectangle(rectangleFullSize, Color::DARK_RED, "w-wing.png");
     RectangleShape backgroundIcon = RectangleShape::createRectangle(rectangleFullSize, Color::DARK_GREY, "bg.png");
     RectangleShape groguIcon = RectangleShape::createRectangle(rectangleFullSize, Color::WHITE, "grogu.png");
     RectangleShape r2d2Icon = RectangleShape::createRectangle(rectangleFullSize, Color::WHITE, "r2d2.png");
@@ -154,13 +155,15 @@ int main()
     RectangleShape heroHealthBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::GREEN, "");
     RectangleShape heroArsenalBarRectangle = RectangleShape::createRectangle(rectangleFullSize, Color::YELLOW, "");
 
-    RectangleShape obstacleBlackRectangle = RectangleShape::createRectangle(1.0, 1.0, Color::WHITE, "planet.png");
-    RectangleShape obstacleGreenRectangle = RectangleShape::createRectangle(1.0, 1.0, Color::GREEN, "yellow_planet.png");
-    RectangleShape obstacleRedRectangle = RectangleShape::createRectangle(1.0, 1.0, Color::DARK_RED, "red_planet.png");
+    RectangleShape obstacleGreenRectangle = RectangleShape::createRectangle(1.0, 1.0, Color::WHITE, "green_planet.png");
+    RectangleShape obstacleYellowRectangle = RectangleShape::createRectangle(1.0, 1.0, Color::GREEN, "yellow_planet.png");
+    RectangleShape obstacleRedRectangle = RectangleShape::createRectangle(1.0, 1.0, Color::YELLOW, "red_planet.png");
+    RectangleShape obstacleAsteroidField = RectangleShape::createRectangle(1.0, 1.0, Color::YELLOW, "asteroids.png");
 
-    DefaultShape::setBlackObstacle(obstacleBlackRectangle);
+    DefaultShape::setYellowObstacle(obstacleYellowRectangle);
     DefaultShape::setGreenObstacle(obstacleGreenRectangle);
     DefaultShape::setRedObstacle(obstacleRedRectangle);
+    DefaultShape::setAsteroidField(obstacleAsteroidField);
 
     RectangleShape heroCanonRectangle = RectangleShape::createRectangle(0.2, 0.075, Color::GREY, "");
 
@@ -178,7 +181,7 @@ int main()
         obstacles.emplace_back();
     }
 
-    MovableObject hero = MovableObject(0.0, -0.80, 0.01, 0.3, 0.3);
+    MovableObject hero = MovableObject(0.0, -0.80, 0.01, 0.2, 0.3);
     //hero.add(&heroCanonEdgeRectangle);
     //hero.add(&heroCanonRectangle)
     hero.add(&groguIcon);
@@ -222,10 +225,6 @@ int main()
         for (int i = 0; i < bulletsOfEnemy.size(); ++i) {
             bulletsOfEnemy[i].draw();
         }
-
-        //changeShader(&textureShader, &colorShader);
-        //enemyShoot.draw();
-
 
         if (enemy.health < 0) break;
         if (hero.health < 0) return 1;
@@ -368,7 +367,7 @@ int main()
     enemyCircle.destructor();
     greenCircle.destructor();
     enemyHealthBarRectangle.destructor();
-    obstacleBlackRectangle.destructor();
+    obstacleYellowRectangle.destructor();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
