@@ -339,8 +339,6 @@ void processInput(GLFWwindow *window) {
     {
         camera.crouch = false;
     }
-
-
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback
