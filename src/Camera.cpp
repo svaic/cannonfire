@@ -39,6 +39,14 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
     Position -= Right * velocity;
   if (direction == RIGHT)
     Position += Right * velocity;
+
+    if (Position.y > 0.5) {
+        Position.y = 0.5;
+    }
+
+    if (Position.y < 0) {
+        Position.y = 0.5;
+    }
 }
 
 // Processes input received from a mouse input system. Expects the offset
@@ -90,4 +98,39 @@ void Camera::updateCameraVectors() {
                         // closer to 0 the more you look up or down which
                         // results in slower movement.
   Up = glm::normalize(glm::cross(Right, Front));
+}
+
+void Camera::Jump (float deltaTime)
+{
+    Position.y += velocity;
+    yPos = Position.y;
+    if (Position.y <= 0.5f)
+    {
+        jump = false;
+    }
+    if (jump)
+    {
+        velocity -= 0.0981f * deltaTime * 0.25f;
+    }
+    else
+    {
+        velocity = 0;
+    }
+}
+
+void Camera::Crouch(float deltaTime) {
+
+    Position.y += velocity;
+    yPos = Position.y;
+    if (crouch)
+    {
+        if (Position.y >= 0.3f)
+        {
+            velocity -= 0.0981f * deltaTime * 2.0f;
+        }
+    }
+    else if (yPos < 0.5)
+    {
+        velocity += 0.1f * deltaTime;
+    }
 }
