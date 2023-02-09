@@ -1,9 +1,13 @@
 #version 330 core
+out vec4 FragColor;
 
-in vec3 vertexColor;
+// texture samplers
+uniform sampler2D texture1;
+uniform sampler2D texture2;
+uniform vec4 col;
 
-out vec4 fragColor;
-
-void main() {
-    fragColor = vec4(vertexColor, 1.0f);
+void main()
+{
+        // linearly interpolate between both textures (80% container, 20% awesomeface)
+        FragColor = vec4(0, 2/3, 1.0, 1.0);
 }
